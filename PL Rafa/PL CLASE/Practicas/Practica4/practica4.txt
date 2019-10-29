@@ -1,0 +1,35 @@
+#######################################################################
+			PRÁCTICA 4: 
+		    RUIZ BONADL, JUAN
+		  ROMÁN AGUILAR, RAFAEL
+#######################################################################
+
+	.comm	a, 4, 2
+	.comm	b, 4, 2
+	.comm	c, 4, 2		;asi declaramos a,b y c
+	.comm	m, 4, 2
+	.comm	n, 4, 2
+
+main:
+	leaq a(%rip),%rax
+	movl $5,(%rax)
+	leaq b(%rip),%rax
+	movl $7,(%rax)
+	
+	;aqui nos falta meter el resultado de la funcion en rax
+	leaq c(%rip),%rax
+	call f
+	movl f,(%rax)
+
+
+
+
+f:	
+	movl m(%rip),%rax
+	movl (%rax),eax
+	movl n(%rip),%rax
+	movl (%rax),%edx
+	addq %eax,%edx
+	ret
+	
+	

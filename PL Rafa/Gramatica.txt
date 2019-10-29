@@ -1,0 +1,128 @@
+------------------------------SEGUNDO EJERCICIO EXAMEN JUNIO 2019----------------------------------------------------------------------------------------------------------------------------
+Juan Ruiz Bonald
+
+Punto 2)
+
+GRAMATICA PARA UN TRADUCTOR ASCENDENTE:
+
+entrada -> linea ';' entrada 
+        -> Epsilon
+
+linea -> declaracion 
+      -> instruccion 
+
+declaracion -> tipo (1) resto 
+
+resto -> resto ',' (2) dec 
+      -> dec
+
+dec -> ID {tablatipo[ID.lexval] = dec.h}
+    -> puntero ID {dec.s = new Tpuntero(dec.h) tantas iter como el tam de puntero.s, tablatipo[ID.lexval] = dec.h}
+    -> ID dim {tablatipo[ID.lexval] = dec.h, dec.s = new Tarray(dim.s1,dec.h) tantas iter como el tam de dim.s2}
+
+tipo -> INT {tipo.s = new TInt()}
+     -> CHAR {tipo.s = new TChar()}
+     -> FLOAT {tipo.s = new TFloat()}
+
+puntero -> '*' puntero {Pcont += 1}
+        -> '*' {Pcont = 1}
+
+dim -> '[' NUMI ']' dim {Dcont += 1, vec[Dcont] = NUMI}
+    -> '[' NUMI ']' {Dcont = 1, vec[Dcont] = NUMI}
+
+instruccion -> asignacion {tipo, nodo = asignacion.s, escribir(tipo, nodo)}
+            -> var {tipo, nodo = asignacion.s, escribir(tipo, nodo)}
+            -> '&' ID {tipo = Tpuntero(tablatipo[ID.lexval]), nodo = newNodoAmp(new nodoID(ID.lexval)), escribir(tipo, nodo)}
+
+asignacion -> var '=' expr {tipo = new TInt/TChar/TFloat(Depende del tipo de var.s y expr.s), nodo = new NodoAsig(new Nodoftoi/Nodoitof/Nodoctoi/Nodoitoc)(Depende de expr.s y var.s), asignacion.s =(tipo, nodo)}
+
+var -> ID {tipo = tablatipo[ID.lexval], nodo = new NodoID(ID.lexval), var.s =(tipo, nodo)}
+    -> puntero ID {tipo = tablatipo[ID.lexval],nodo = new NodoPuntero(tipo) tantas iter como el tam de puntero.s, var.s =(tipo, nodo)}
+    -> ID vect {tipo = tablatipo[ID.lexval], nodo = new NodoArray(vect.s1,dec.h) tantas iter como el tam de vect.s2, var.s =(tipo, nodo)}
+
+vect -> '[' valor ']' vect {Dcont += 1, vec[Dcont] = valor.s}
+     -> '[' valor ']' {Dcont = 1, vec[Dcont] = valor.s}
+
+valor -> ID {tipo = tablatipo[ID.lexval], nodo = new NodoID(ID.lexval), valor.s =(tipo, nodo)}
+      -> puntero ID {tipo = tablatipo[ID.lexval],nodo = new NodoPuntero(tipo) tantas iter como el tam de puntero.s, valor.s =(tipo, nodo)}
+      -> num {valor.s = num.s}
+
+num -> NUMI {tipo = new TInt(), nodo = new NodoCteI(NUMI), num.s =(tipo, nodo)}
+    -> NUMF {tipo = new TFloat(), nodo = new NodoCteF(NUMF), num.s =(tipo, nodo)}
+
+expr -> sum '+' expr {tipo = new TInt/TChar/TFloat(Depende del tipo de sum.s y expr.s), nodo = new NodoSuma(new Nodoftoi/Nodoitof/Nodoctoi/Nodoitoc)(Depende de sum.s y expr.s), expr.s =(tipo, nodo)}
+     -> sum {expr.s = sum.s}
+
+sum -> factor '*' sum {tipo = new TInt/TChar/TFloat(Depende del tipo de factor.s y sum.s), nodo = new NodoProd(new Nodoftoi/Nodoitof/Nodoctoi/Nodoitoc)(Depende de factor.s y sum.s), sum.s =(tipo, nodo)}
+    -> factor {sum.s = factor.s}
+
+factor -> var {factor.s = sum.s}
+       -> num {factor.s = num.s}
+       -> '(' expr ')' {factor.s = expr.s}
+
+(1) {resto.h = tipo.s}
+(2) {dec.h = resto.h}
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Punto 3) 
+
+GRAMATICA ADAPTADA PARA UN TRADUCTOR DESCENDENTE:
+
+entrada -> linea ';' entrada 
+        -> Epsilon
+
+linea -> declaracion 
+      -> instruccion 
+
+declaracion -> tipo resto
+
+resto -> dec restoP 
+
+restoP -> ',' dec restoP
+       -> Epsilon
+
+dec -> ID 
+    -> puntero ID 
+    -> ID dim
+
+tipo -> INT 
+     -> CHAR 
+     -> FLOAT  
+
+puntero -> '*' puntero 
+        -> '*'
+
+dim -> '[' NUMI ']' dim 
+    -> '[' NUMI ']'
+
+instruccion -> asignacion 
+            -> var 
+            -> '&' ID
+
+asignacion -> var '=' expr
+
+var -> ID 
+    -> puntero ID 
+    -> ID vect
+
+vect -> '[' valor ']' vect 
+     -> '[' valor ']'
+
+valor -> ID 
+      -> puntero ID 
+      -> num 
+
+num -> NUMI 
+    -> NUMF
+
+expr -> sum '+' expr 
+     -> sum
+
+sum -> factor '*' sum 
+    -> factor 
+
+factor -> var 
+       -> num 
+       -> '(' expr ')'
