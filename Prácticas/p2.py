@@ -37,35 +37,39 @@ class CalcLexer(Lexer):
     # Identifiers and keywords
     ID = r'[a-zA-Z_][a-zA-Z0-9_]*'
 
-    #STR = r'[a-zA-Z!¿?]'
-    
 class CalcParser(Parser):
     # Get the token list from the lexer
     tokens = CalcLexer.tokens
 
     # Grammar rules and actions
+    @_('assign ";"')
+    def entrada(self, p):
+        return p.assign
     '''
-    @_('PR "(" \" expr \" ")", ')
-    @_('PR "(" string vars")" ";"')
-    def print(self, p):
-        print(p.str)
-
-    @_('str word')
-    def string(self, p):
-    '''
-
-    @_('ID ASSIGN expr ";"')
-    def assign(self, p):
-        Tabla[p.ID] = p.expr
+    @_('assign1 ASSIGN assign')
+    def assign1(self, p):
+        Tabla[p.ID] = p.assign1
         return Tabla[p.ID]
 
-    @_('expr ";"')
+    @_('assign')
+    def assign1(self, p):
+        return p.assign'''
+
+    @_('ID ASSIGN assign')
+    def assign(self, p):
+        Tabla[p.ID] = p.assign
+        return Tabla[p.ID]
+
+    @_('expr')
     def assign(self, p):
         return p.expr
 
     @_('expr AND term')
     def expr(self, p):
-        return p.expr and p.term
+        if(p.expr and p.term):
+            return 1
+        else:
+            return 0
 
     @_('expr OR term')
     def expr(self, p):
@@ -160,6 +164,10 @@ class CalcParser(Parser):
     @_('NUMBER')
     def cipher(self, p):
         return p.NUMBER
+
+    @_('"(" assign ")"')
+    def cipher(self, p):
+        return p.assign
 
 if __name__ == "__main__":
     lexer = CalcLexer()

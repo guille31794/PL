@@ -2,6 +2,6 @@
 
 int main(int argc, char const *argv[])
 {
-    printf("%d", 3 != 3 == 0);
+    printf("%d", 3 && 4);
     return 0;
 }
