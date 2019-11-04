@@ -1,0 +1,7 @@
+entrada -> type pointer id masentrada ";"
+entrada -> CHAR id "[" pointer id "]" maschar ";"
+masentrada -> "," id masentrada | epsilon
+pointer -> "*" mas | epsilon
+maschar -> "," "[" pointer id "]" maschar | pointer
+id -> ID | NUM
+type -> INT | FLOAT

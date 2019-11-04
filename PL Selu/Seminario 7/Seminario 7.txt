@@ -1,0 +1,117 @@
+Ejercicio 1:
+
+//Codigo c:
+
+#include <stdio.h>
+float pi;
+float AreaCirculo (float pi, float r){
+	float temp;
+	temp = pi * r * r;
+	return temp;
+}
+
+int main(){
+	float radio, sol;
+	pi = 3.1416;
+	printf(“Introduzca el radio del circulo: ”);
+	scanf(“%f”, &radio);
+	sol = AreaCirculo(pi, radio);
+	printf(“El area del circulo es %f\n, sol”);
+	return 0;
+}
+
+//Ensablador:
+
+.att_syntax # sintaxis AT&T
+.file "Area.c"
+.text
+.globl Area
+.type Area, @function
+
+AreaCirculo:
+	pushl %ebp
+	movl %esp, %ebp
+	subl $8, %esp
+
+	movl 8(%ebp), %eax
+	imull 12(%ebp), %eax
+
+	imull 12(%ebp), %eax
+
+	movl %eax, -4(%ebp)
+
+	movl -4(&ebp), %eax
+
+	movl %ebp, %esp
+	popl %ebp
+	ret
+
+.text
+.globl main
+.type main, @function
+
+.section .rodata
+.LC0:
+	.string "Introduzca el radio del circulo: "
+.LC1:
+	.string "%f"
+.LC2:
+	.string "El area del circulo es %f\n"
+
+main:
+	pushl %ebp
+	movl %esp, %ebp
+	subl $12, %esp
+
+	movl 3.1416, pi
+
+	movl $.LC0, %eax
+	pushl %eax
+	call printf
+	popl %ebx
+
+	leal -4(%ebp), %eax
+	pushl %eax
+	movl $.LC1, %eax
+	pushl %eax
+	call scanf
+	popl %ebx
+	popl %ebx
+
+	movl 8(%ebp), %eax
+	puhsl %eax
+	movl 12(%ebp), %eax
+	puhsl %eax
+	call AreaCirculo
+	popl %ebx
+	popl %ebx
+
+	movl %eax, -8(%ebp)
+
+	puhsl -8(%ebp)
+	movl $.LC2, %eax
+	pushl %eax
+	call printf
+	popl %ebx
+	popl %ebx
+
+	movl $0, %eax
+
+	movl %ebp, %esp
+	popl %ebp
+	ret
+
+Ejercicio 2:
+
+SentAsign -> ID ‘:=‘ E {emite(ID.lexval, ‘:=‘, E.tmp);}
+E -> E1 + S {E.tmp := nuevoTmp( ); emite(E.tmp, ‘:=‘, E1.tmp,’+’,S.tmp);}
+E -> E1 - S {E.tmp := nuevoTmp( ); emite(E.tmp, ‘:=‘, E1.tmp,’-’,S.tmp);}
+E -> S {E.tmp := S.tmp;}
+S -> S1 * F { S.tmp := nuevoTmp( ); emite(S.tmp,’:=‘,S1.tmp,’*’,F.tmp);}
+S -> S1 / F { S.tmp := nuevoTmp( ); emite(S.tmp,’:=‘,S1.tmp,’/’,F.tmp);}
+S -> F { S.tmp := F.tmp;}
+F -> - F1 {F.tmp := nuevoTmp( ); emite(F.tmp, “:=“,MENOSU,F1.tmp);}
+F -> ID {F.tmp : = ID.lexval;}
+F -> NUMERO {F.tmp := nuevoTmp( ); emite(F.tmp, ‘:=‘, NUMERO.lexval);} 
+
+El esquema soporta perferctamente el ejemplo dado.

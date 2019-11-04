@@ -1,0 +1,186 @@
+Ejercicio 1:
+
+//Codigo C:
+
+/******** factorial recursivo ********/
+#include <stdio.h>
+int m;
+
+int fact(int n) {
+	if (n <= 1)
+		return 1;
+ 	else
+		return n * fact(n-1);
+} // fin de fact()
+
+int main(int argn, char* argc[]) {
+	int n;
+	printf("Teclea un entero\n");
+	scanf("%d", &n);
+	m = fact(n);
+	printf("El factorial de %d = %d\n", n, m);
+	return 0;
+} // fin de main()
+
+//Ensamblador:
+
+.text
+.globl fact
+.type fact, @function
+
+fact:
+	pushl %ebp
+	movl %esp, %ebp
+	
+	movl 8(%ebp), %eax
+	cmpl %eax, $1
+	jg else
+	movl $1, %eax
+	movl %ebp, %esp
+	popl %ebp
+	ret
+else:
+	movl 8(%ebp), %eax
+	movl 8(%ebp), %ebx
+	#No se como hacer el caso general recursivo.	
+
+.text
+.globl main
+.type main, @function
+
+.section .rodata
+.LC0:
+	.string "Teclea un entero\n "
+.LC1:
+	.string "%d"
+.LC2:
+	.string "El factorial de %d = %d\n"
+
+main:
+	pushl %ebp
+	movl %esp, %ebp
+	subl $4, %esp
+
+	pushl -4(%ebp)
+	movl $.LC0, %eax
+	pushl %eax
+	call printf
+	popl %ebx
+	popl %ebx
+
+	leal -4(%ebp), %eax
+	pushl %eax
+	movl $.LC1, %eax
+	pushl %eax
+	call scanf
+	popl %ebx
+	popl %ebx
+
+	pushl -4(%ebp)
+	call fact
+	popl %ebx
+
+	movl %eax, m
+
+	pushl -4(%ebp)
+	pushl m
+	movl $.LC2, %eax
+	pushl %eax
+	call printf
+	pop %ebx
+	pop %ebx
+	pop %ebx
+
+	movl $0, %eax
+
+	movl %ebp, %esp
+	popl %ebp
+	ret
+
+
+Ejercicio 2:
+
+//Codigo C:
+
+/******** mayor de tres numeros ********/
+#include <stdio.h>
+int a, b, c;
+
+int main(int argn, char* argc[]) {
+	int mayor;
+	printf("Teclea tres enteros: ");
+ 	scanf("%d%d%d", &a, &b, &c);
+ 	if (a >= b && a >= c)
+ 		mayor = a;
+ 	else if (b >= a && b >= c)
+ 		mayor = b;
+ 	else
+ 		mayor = c;
+ 	printf("El mayor es %d = %d\n", mayor);
+ 	return 0;
+} // fin de main()
+
+//Ensamblador:
+
+.text
+.globl main
+.type main, @function
+
+.section .rodata
+.LC0:
+	.string "Teclea tres enteros: "
+.LC1:
+	.string "%d%d%d"
+.LC2:
+	.string "El mayor es %d = %d\n"
+
+main:
+	pushl %ebp
+	movl %esp, %ebp
+	subl $4, %esp
+
+	movl $.LC0, %eax
+	pushl %eax
+	call printf
+	popl %ebx
+
+	pushl $a
+	pushl $b
+	pushl $c
+	movl $.LC1, %eax
+	pushl %eax
+	call scanf
+	popl %ebx
+	popl %ebx
+	popl %ebx
+	popl %ebx
+
+	movl a, %eax
+	cmpl %eax, b
+	ja elseif
+	cmpl $0, %eax
+	je elseif
+	cmp %eax, c
+	ja elseif
+	movl a, -4(%ebp)
+elseif:
+	mvl b, %eax
+	cmpl %eax, a
+	ja else
+	cmpl $0, %eax
+	je else
+	cmpl %eax, c
+	ja else
+	movl b, -4(%ebx)
+else:
+	movl c, -4(%ebx)
+
+	movl -4(%ebp), %eax
+	pushl %eax
+	movl $.LC1, %eax
+	pushl %eax
+	call printf
+	popl %ebx
+	popl %ebx
+
+	movl $0, %eax
