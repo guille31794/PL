@@ -1,12 +1,10 @@
 if __name__ == "__main__":
-    s = "Hola %d "
-    a = 2
-    aux = ""
-    for char in s:
-        if char == "%":
-            aux = aux + str(a)
-            char = char + 1 
-        else:
-            aux = aux + char
-
+    v = []
+    v.insert(0, 3)
+    v.insert(0, 2)
+    v.insert(0, 1)
+    s = "Hola %d %d %d"
+    aux = s.replace("%d", str(v.pop()), 1)
+    while aux.find("%d") > -1:
+        aux = aux.replace("%d", str(v.pop()),1)
     print(aux)

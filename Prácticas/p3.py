@@ -3,12 +3,11 @@ from sly import Lexer, Parser
 Tabla = {}
 printf = []
 
-
 class CalcLexer(Lexer):
     # Set of tokens
     tokens = {NUMBER, ID, PLUS, MINUS,
               TIMES, DIVIDE, ASSIGN, EQ, AND, OR, NOT,
-              LT, GT, LE, GE, NE, PR, TYPE, }
+              LT, GT, LE, GE, NE, PR, TYPE, CAD}
 
     literals = {'(', ')', '{', '}', ';', '"', '%' ','}
 
@@ -30,6 +29,7 @@ class CalcLexer(Lexer):
     LE = r'<='
     GE = r'>='
     PR = r'printf'
+    TYPE = r'int'
 
     @_(r'\d+')
     def NUMBER(self, t):
@@ -39,22 +39,42 @@ class CalcLexer(Lexer):
     # Identifiers and keywords
     ID = r'[a-zA-Z_][a-zA-Z0-9_]*'
 
+    @_(r'[\w\s]+')
+    def CAD(self, t):
+        t.value = str(t.value)
+        return t
 
 class CalcParser(Parser):
     # Get the token list from the lexer
     tokens = CalcLexer.tokens
 
     # Grammar rules and actions
-    @_('PR "(" "\"" cadena "\"" param ")" ";"')
+    @_('PR "(" "\"" cadena "\"" param ";"')
     def entrada(self, p):
-        cad = ""
-        for character in p.cadena:
-            if character == '%':
-                cad = cad + printf.pop()
-                printf.pop()
-            else:
-                cad = cad + character
-        print(cad)        
+        if p.CAD.find("%d") > -1:
+            cad = p.CAD.replace("%d", str(printf.pop()), 1)
+            while cad.find("%d") > -1:
+                cad = cad.replace("%d", str(printf.pop()), 1)
+            print(cad)
+        else:
+            print(p.CAD[1:len(p.CAD)-1])
+
+    @_('CAD cadena')
+    def cadena(self, p):
+        return p.CAD + p.cadena
+
+    @_('CAD')
+    def cadena(self, p):
+        return p.CAD
+
+    @_('"," ID param')
+    def param(self, p):
+        printf.insert(0, p.ID)
+        return printf[p.ID]
+
+    @_('")"')
+    def param(self, p):
+        pass      
 
     @_('assign ";"')
     def entrada(self, p):
@@ -185,5 +205,6 @@ if __name__ == "__main__":
             result = parser.parse(lexer.tokenize(text))
             print(result)
             print(Tabla)
+            print(printf)
         except EOFError:
             break
