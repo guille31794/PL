@@ -47,8 +47,14 @@ class CalcParser(Parser):
     # Grammar rules and actions
     @_('PR "(" "\"" cadena "\"" param ")" ";"')
     def entrada(self, p):
-        for character in p.cadena
-            if character == '%'
+        cad = ""
+        for character in p.cadena:
+            if character == '%':
+                cad = cad + printf.pop()
+                printf.pop()
+            else:
+                cad = cad + character
+        print(cad)        
 
     @_('assign ";"')
     def entrada(self, p):
