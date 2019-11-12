@@ -89,9 +89,27 @@ class CalcParser(Parser):
     def declare(self, p):
         pass
         
-    @_('INT assign')
+    @_('INT initialization')
     def declare(self, p):
-        return p.assign
+        pass
+
+    @_('ID ASSIGN assign initialization')
+    def initialization(self, p):
+        if p.ID in Tabla:
+            print(p.ID, "already declared")
+        else:
+            Tabla[p.ID] = p.assign
+    
+    @_('"," ID ASSIGN assign initialization')
+    def initialization(self, p):
+        if p.ID in Tabla:
+            print(p.ID, "already declared")
+        else:
+            Tabla[p.ID] = p.assign
+
+    @_('')
+    def initialization(self, p):
+        pass
         
     @_('ID')
     def vars(self,p):
@@ -109,8 +127,11 @@ class CalcParser(Parser):
 
     @_('ID ASSIGN assign')
     def assign(self, p):
-        Tabla[p.ID] = p.assign
-        return Tabla[p.ID]
+        if p.ID not in Tabla:
+            print(p.ID, "is not declared")
+        else:
+            Tabla[p.ID] = p.assign
+            return Tabla[p.ID]
 
     @_('expr')
     def assign(self, p):
