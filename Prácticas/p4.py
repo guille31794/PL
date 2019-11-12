@@ -7,7 +7,7 @@ class CalcLexer(Lexer):
     # Set of tokens
     tokens = {NUMBER, ID, PLUS, MINUS,
               TIMES, DIVIDE, ASSIGN, EQ, AND, OR, NOT,
-              LT, GT, LE, GE, NE, PR, TYPE, CAD}
+              LT, GT, LE, GE, NE, PR, CAD, INT}
 
     literals = {'(', ')', '{', '}', ';', '"', '%', ','}
 
@@ -29,7 +29,7 @@ class CalcLexer(Lexer):
     LE = r'<='
     GE = r'>='
     PR = r'printf'
-    TYPE = r'int'
+    INT = r'int'
 
     @_(r'\d+')
     def NUMBER(self, t):
@@ -77,9 +77,35 @@ class CalcParser(Parser):
     def param(self, p):
         pass      
 
+    @_('declare ";"')
+    def entrada(self, p):
+        return p.declare
+
     @_('assign ";"')
     def entrada(self, p):
         return p.assign
+
+    @_('INT vars')
+    def declare(self, p):
+        pass
+        
+    @_('INT assign')
+    def declare(self, p):
+        return p.assign
+        
+    @_('ID')
+    def vars(self,p):
+        if p.ID not in Tabla:
+            Tabla[p.ID] = 0
+        else:
+            print("Error,", p.ID, "re-declared.")
+    
+    @_('ID "," vars')
+    def vars(self, p):
+        if p.ID not in Tabla:
+            Tabla[p.ID] = 0
+        else:
+            print("Error,", p.ID, "re-declared.")
 
     @_('ID ASSIGN assign')
     def assign(self, p):
