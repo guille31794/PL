@@ -49,8 +49,28 @@ class CalcParser(Parser):
     tokens = CalcLexer.tokens
 
     # Grammar rules and actions
+    @_('whatever ";" sentence')
+    def sentence(self, p):
+        pass
+    
+    @_('')
+    def sentence(self, p):
+        pass
+    
+    @_('printf')
+    def whatever(self, p):
+        pass
+
+    @_('declaration')
+    def whatever(self, p):
+        pass
+
+    @_('assign')
+    def whatever(self, p):
+        pass
+
     @_('PR "(" CAD param ";"')
-    def entrada(self, p):
+    def printf(self, p):
         if p.CAD.find("%d%") > -1:
             cad = p.CAD.replace("%d", str(printf.pop()), 1)
             while cad.find("%d") > -1:
@@ -76,43 +96,73 @@ class CalcParser(Parser):
     @_('")"')
     def param(self, p):
         pass      
+    
+    @_('INT variable')
+    def declaration(self, p):
+        pass
 
-    @_('INT declare ";"')
-    def entrada(self, p):
-        return p.declare
+    @_('ID empty1 variable')
+    def variable(self, p):
+        if p.empty1:
+            Tabla[p.ID] = 0
+            return Tabla[p.ID]
+        else:
+            print("Error.", p.ID, "redeclared.")
+    
+    @_('ID ASSIGN empty2 cipher variable')
+    def variable(self, p):
+        if p.empty2:
+            Tabla[p.ID] = p.cipher
+            return Tabla[p.ID]
+        else:
+            print("Error.", p.ID, "redeclared")
 
-    @_('initialization declare')
-    def declare(self, p):
-        return p.initialization
-
-    @_('vars declare')
-    def declare(self, p):
-        return p.vars
-
-    @_('')
-    def declare(self, p):
+    @_('"," variable')
+    def variable(self, p):
         pass
     
-    @_('assign ","')
-    def initialization(self, p):
-        if p.assign in Tabla:
-            print(p.assign, "already declared")
-        
-    @_('ID ","')
-    def vars(self,p):
-        if p.ID not in Tabla:
-            pass#Tabla[p.cipher] = 0
+    @_('')
+    def variable(self,p):
+        pass
+    
+    # Controls wether or not variable is declared
+    # previously to declaration
+    @_('')
+    def empty1(self, p):
+        if p[-1] not in Tabla:
+            return True
         else:
-            print("Error,", p.ID, "re-declared.")
+            return False
 
-    @_('ID ASSIGN assign')
+    # Controls wether or not variable is declared
+    # previously to initialization
+    @_('')
+    def empty2(self, p):
+        if p[-2] in Tabla:
+            return False
+        else:
+            return True
+
+    @_('ID ASSIGN empty3 assign')
     def assign(self, p):
-        Tabla[p.ID] = p.assign
-        return Tabla[p.ID]
+        if p.empty3:
+            Tabla[p.ID] = p.assign
+            return Tabla[p.ID]
+        else:
+            print("Error.", p.ID, "not declared")
 
     @_('expr')
     def assign(self, p):
         return p.expr
+
+    # Controls wether or not variable is declared
+    # previously to assignation
+    @_('')
+    def empty3(self, p):
+        if p[-2] in Tabla:
+            return True
+        else:
+            return False
 
     @_('expr AND term')
     def expr(self, p):
