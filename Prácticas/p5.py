@@ -1,6 +1,7 @@
 from sly import Lexer, Parser
 
-Tabla = {}
+Variables = {}
+Pointer = {}
 printf = []
 
 class CalcLexer(Lexer):
@@ -69,7 +70,7 @@ class CalcParser(Parser):
     def whatever(self, p):
         pass
 
-    @_('PR "(" CAD param ";"')
+    @_('PR "(" CAD param')
     def printf(self, p):
         if p.CAD.find("%d%") > -1:
             cad = p.CAD.replace("%d", str(printf.pop()), 1)
@@ -91,78 +92,65 @@ class CalcParser(Parser):
 
     @_('"," ID param')
     def param(self, p):
-        printf.append(Tabla[p.ID])
+        printf.append(Variables[p.ID])
 
     @_('")"')
     def param(self, p):
         pass      
     
-    @_('INT variable')
+    @_('INT types')
     def declaration(self, p):
         pass
 
-    @_('ID empty1 variable')
+    @_('variable')
+    def types(self, p):
+        pass
+
+    '''@_('pointer')
+    def types(self, p):
+        pass'''
+
+    @_('ID empty1 empty4 variableSeparator')
     def variable(self, p):
         if p.empty1:
-            Tabla[p.ID] = 0
-            return Tabla[p.ID]
+            if p.empty4:
+                Variables[p.ID] = 0
+                return Variables[p.ID]
+            else:
+                print("error: conflicting types for", p.ID)
         else:
             print("Error.", p.ID, "redeclared.")
     
-    @_('ID ASSIGN empty2 cipher variable')
+    @_('ID ASSIGN empty2 empty5 cipher variableSeparator')
     def variable(self, p):
         if p.empty2:
-            Tabla[p.ID] = p.cipher
-            return Tabla[p.ID]
+            if p.empty5:
+                Variables[p.ID] = p.cipher
+                return Variables[p.ID]
+            else:
+                print("error: conflicting types for", p.ID)
         else:
             print("Error.", p.ID, "redeclared")
 
     @_('"," variable')
-    def variable(self, p):
+    def variableSeparator(self, p):
         pass
     
     @_('')
-    def variable(self,p):
+    def variableSeparator(self,p):
         pass
-    
-    # Controls wether or not variable is declared
-    # previously to declaration
-    @_('')
-    def empty1(self, p):
-        if p[-1] not in Tabla:
-            return True
-        else:
-            return False
-
-    # Controls wether or not variable is declared
-    # previously to initialization
-    @_('')
-    def empty2(self, p):
-        if p[-2] in Tabla:
-            return False
-        else:
-            return True
 
     @_('ID ASSIGN empty3 assign')
     def assign(self, p):
         if p.empty3:
-            Tabla[p.ID] = p.assign
-            return Tabla[p.ID]
+            Variables[p.ID] = p.assign
+            return Variables[p.ID]
         else:
             print("Error.", p.ID, "not declared")
 
     @_('expr')
     def assign(self, p):
         return p.expr
-
-    # Controls wether or not variable is declared
-    # previously to assignation
-    @_('')
-    def empty3(self, p):
-        if p[-2] in Tabla:
-            return True
-        else:
-            return False
 
     @_('expr AND term')
     def expr(self, p):
@@ -256,10 +244,10 @@ class CalcParser(Parser):
 
     @_('ID')
     def cipher(self, p):
-        if p.ID not in Tabla:
-            Tabla[p.ID] = 0
+        if p.ID not in Variables:
+            Variables[p.ID] = 0
 
-        return Tabla[p.ID]
+        return Variables[p.ID]
 
     @_('NUMBER')
     def cipher(self, p):
@@ -269,6 +257,48 @@ class CalcParser(Parser):
     def cipher(self, p):
         return p.assign
 
+    # Controls wether or not variable is declared
+    # previously to declaration
+    @_('')
+    def empty1(self, p):
+        if p[-1] in Variables:
+            return False
+        else:
+            return True
+
+    # Controls wether or not variable is declared
+    # previously to initialization
+    @_('')
+    def empty2(self, p):
+        if p[-2] in Variables:
+            return False
+        else:
+            return True
+
+    # Controls wether or not variable is declared
+    # previously to assignation
+    @_('')
+    def empty3(self, p):
+        if p[-2] in Variables:
+            return True
+        else:
+            return False
+
+    # Controls wether or not a variable name it's
+    # a declared pointer
+    @_('')
+    def empty4(self, p):
+        if p[-2] in Pointer:
+            return False
+        else:
+            return True
+
+    @_('')
+    def empty5(self, p):
+        if p[-3] in Pointer:
+            return False
+        else:
+            return True
 
 if __name__ == "__main__":
     lexer = CalcLexer()
@@ -278,6 +308,6 @@ if __name__ == "__main__":
         try:
             text = input('calc > ')
             result = parser.parse(lexer.tokenize(text))
-            print(Tabla)
+            print(Variables)
         except EOFError:
             break
