@@ -8,7 +8,7 @@ class CalcLexer(Lexer):
     # Set of tokens
     tokens = {NUMBER, ID, PLUS, MINUS,
               TIMES, DIVIDE, ASSIGN, EQ, AND, OR, NOT,
-              LT, GT, LE, GE, NE, PR, CAD, INT}
+              LT, GT, LE, GE, NE, PR, CAD, INT, AMPERSAND}
 
     literals = {'(', ')', '{', '}', ';', '"', '%', ','}
 
@@ -31,6 +31,7 @@ class CalcLexer(Lexer):
     GE = r'>='
     PR = r'printf'
     INT = r'int'
+    AMPERSAND = r'&'
 
     @_(r'\d+')
     def NUMBER(self, t):
@@ -98,17 +99,17 @@ class CalcParser(Parser):
     def param(self, p):
         pass      
     
-    @_('INT types')
+    @_('INT dectypes')
     def declaration(self, p):
         pass
 
     @_('variable')
-    def types(self, p):
+    def dectypes(self, p):
         pass
 
-    '''@_('pointer')
-    def types(self, p):
-        pass'''
+    @_('pointer')
+    def dectypes(self, p):
+        pass
 
     @_('ID empty1 empty4 variableSeparator')
     def variable(self, p):
@@ -132,7 +133,29 @@ class CalcParser(Parser):
         else:
             print("Error.", p.ID, "redeclared")
 
-    @_('"," variable')
+    @_('TIMES ID empty1 empty4 variableSeparator')
+    def pointer(self, p):
+        if p.empty1:
+            if p.empty4:
+                Pointer[p.ID] = 'NULL'
+                return Pointer[p.ID]
+            else:
+                print("Error:", p.ID, "redeclared")
+        else:
+            print("error: conflicting types for", p.ID)
+
+    @_('TIMES ID ASSIGN empty2 empty5 AMPERSAND ID variableSeparator')
+    def pointer(self, p):
+        if p.empty2:
+            if p.empty5:
+                Pointer[p.ID0] = p.ID1
+                return p.ID0
+            else:
+                print("Error:", p.ID0, "redeclared")
+        else:
+            print("error: conflicting types for", p.ID0)
+
+    @_('"," dectypes')
     def variableSeparator(self, p):
         pass
     
@@ -309,5 +332,6 @@ if __name__ == "__main__":
             text = input('calc > ')
             result = parser.parse(lexer.tokenize(text))
             print(Variables)
+            print(Pointer)
         except EOFError:
             break
