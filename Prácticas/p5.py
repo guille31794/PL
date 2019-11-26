@@ -1,15 +1,17 @@
 from sly import Lexer, Parser
+import sys
 
 Variables = {}
 Pointer = {}
 printf = []
-Variables['NULL'] = 'NULL'
+scanf = []
+#Variables['NULL'] = 'NULL'
 
 class CalcLexer(Lexer):
     # Set of tokens
     tokens = {NUMBER, ID, PLUS, MINUS,
               TIMES, DIVIDE, ASSIGN, EQ, AND, OR, NOT,
-              LT, GT, LE, GE, NE, PR, CAD, INT, AMPERSAND}
+              LT, GT, LE, GE, NE, PR, CAD, INT, AMPERSAND, SC}
 
     literals = {'(', ')', '{', '}', ';', '"', '%', ','}
 
@@ -33,6 +35,7 @@ class CalcLexer(Lexer):
     PR = r'printf'
     INT = r'int'
     AMPERSAND = r'&'
+    SC = r'scanf'
 
     @_(r'\d+')
     def NUMBER(self, t):
@@ -64,12 +67,37 @@ class CalcParser(Parser):
     def whatever(self, p):
         pass
 
+    @_('scanf')
+    def whatever(self, p):
+        pass
+
     @_('declaration')
     def whatever(self, p):
         pass
 
     @_('assign')
     def whatever(self, p):
+        pass
+
+    @_('SC "(" CAD store')
+    def scanf(self, p):
+        leng = len(scanf)
+        while p.CAD.find("%d") > -1 and leng > 0:
+                Variables[scanf[0]] = input()
+                p.CAD.replace("%d", "")
+                scanf.remove(scanf[0])
+                leng -= 1
+                
+        if leng > 0 or p.CAD.find("%d") > -1:
+            print("error: incorrect syntax")
+            sys.exit()
+
+    @_('"," AMPERSAND ID store')
+    def store(self, p):
+        scanf.append(p.ID)
+    
+    @_('")"')
+    def store(self, p):
         pass
 
     @_('PR "(" CAD param')
