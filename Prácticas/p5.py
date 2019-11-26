@@ -3,6 +3,7 @@ from sly import Lexer, Parser
 Variables = {}
 Pointer = {}
 printf = []
+Variables['NULL'] = 'NULL'
 
 class CalcLexer(Lexer):
     # Set of tokens
@@ -73,27 +74,50 @@ class CalcParser(Parser):
 
     @_('PR "(" CAD param')
     def printf(self, p):
-        if p.CAD.find("%d%") > -1:
-            cad = p.CAD.replace("%d", str(printf.pop()), 1)
-            while cad.find("%d") > -1:
-                cad = cad.replace("%d", str(printf.pop()), 1)
-            print(cad[1:len(cad)-1])
-        elif p.CAD.find("%d ") > -1:
-            cad = p.CAD.replace("%d", str(printf.pop()), 1)
-            while cad.find("%d") > -1:
-                cad = cad.replace("%d", str(printf.pop()), 1)
-            print(cad[1:len(cad)-1])
-        elif p.CAD.find("%d\"") > -1:
-            cad = p.CAD.replace("%d", str(printf.pop()), 1)
-            while cad.find("%d") > -1:
-                cad = cad.replace("%d", str(printf.pop()), 1)
-            print(cad[1:len(cad)-1])
-        else:
-            print(p.CAD[1:len(p.CAD)-1])
+        try:
+            if p.CAD.find("%d%") > -1:
+                cad = p.CAD.replace("%d", str(printf.pop()), 1)
+                while cad.find("%d") > -1:
+                    cad = cad.replace("%d", str(printf.pop()), 1)
+                print(cad[1:len(cad)-1])
+            elif p.CAD.find("%d ") > -1:
+                cad = p.CAD.replace("%d", str(printf.pop()), 1)
+                while cad.find("%d") > -1:
+                    cad = cad.replace("%d", str(printf.pop()), 1)
+                print(cad[1:len(cad)-1])
+            elif p.CAD.find("%d\"") > -1:
+                cad = p.CAD.replace("%d", str(printf.pop()), 1)
+                while cad.find("%d") > -1:
+                    cad = cad.replace("%d", str(printf.pop()), 1)
+                print(cad[1:len(cad)-1])
+            else:
+                print(p.CAD[1:len(p.CAD)-1])
+        except IndexError:
+            print("error: segmetation fault code 20502")
 
-    @_('"," ID param')
+    @_('"," ID empty1 empty4 param')
     def param(self, p):
-        printf.append(Variables[p.ID])
+        if not p.empty1:
+            printf.append(Variables[p.ID])
+        elif not p.empty4:
+            printf.append(hex(id(Variables[Pointer[p.ID]])))
+        else:
+            print("error:", p.ID, "not declared")
+
+    @_('"," AMPERSAND ID empty1 empty4 param')
+    def param(self, p):
+        if not p.empty1:
+            printf.append(hex(id(Variables[p.ID])))
+        elif not p.empty4:
+            printf.append(hex(id(Pointer[p.ID])))
+        else:
+            print("error:", p.ID, "not declared")
+
+    @_('"," TIMES ID empty6 param')
+    def param(self, p):
+        if p.empty6:
+            printf.append(Variables[Pointer[p.ID]])
+                
 
     @_('")"')
     def param(self, p):
@@ -170,6 +194,17 @@ class CalcParser(Parser):
             return Variables[p.ID]
         else:
             print("Error.", p.ID, "not declared")
+
+    @_('ID ASSIGN empty4 AMPERSAND ID empty1')
+    def assign(self, p):
+        if not p.empty4:
+            if not p.empty1:
+                Pointer[p.ID0] = p.ID1
+                return Pointer[p.ID0]
+            else:
+                print("error:", p.ID1, "not declared")
+        else:
+            print("error:", p.ID0, "not declared")
 
     @_('expr')
     def assign(self, p):
@@ -322,6 +357,13 @@ class CalcParser(Parser):
             return False
         else:
             return True
+    
+    @_('')
+    def empty6(self, p):
+        if p[-1] in Pointer:
+            return True
+        else:
+            return False
 
 if __name__ == "__main__":
     lexer = CalcLexer()
