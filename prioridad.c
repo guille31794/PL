@@ -2,6 +2,7 @@
 
 int main(int argc, char const *argv[])
 {
-    printf("%d", 3 && 4);
-    return 0;
+    int a, b;
+    scanf("%d %d", &a, &b);
+    printf("%d %d", a, b);
 }

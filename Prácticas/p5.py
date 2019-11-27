@@ -83,9 +83,8 @@ class CalcParser(Parser):
     def scanf(self, p):
         leng = len(scanf)
         while p.CAD.find("%d") > -1 and leng > 0:
-                Variables[scanf[0]] = input()
-                p.CAD.replace("%d", "")
-                scanf.remove(scanf[0])
+                Variables[scanf.pop()] = input()
+                p.CAD = p.CAD.replace("%d", "", 1)
                 leng -= 1
                 
         if leng > 0 or p.CAD.find("%d") > -1:
