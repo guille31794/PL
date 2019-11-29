@@ -400,5 +400,7 @@ if __name__ == "__main__":
         try:
             text = input('calc > ')
             result = parser.parse(lexer.tokenize(text))
+            print(Variables)
+            print(Pointer)
         except EOFError:
             break
