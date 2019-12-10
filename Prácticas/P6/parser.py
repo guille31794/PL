@@ -1,172 +1,7 @@
-from sly import Lexer, Parser
+from lexer import * # Test without from.. *
+from nodes import *
+from sly import Parser
 import sys
-
-Variables = {}
-Pointer = {}
-printf = []
-scanf = []
-
-class CalcLexer(Lexer):
-    # Set of tokens
-    tokens = {NUMBER, ID, PLUS, MINUS,
-              TIMES, DIVIDE, ASSIGN, EQ, AND, OR, NOT,
-              LT, GT, LE, GE, NE, PR, CAD, INT, AMPERSAND, SC}
-
-    literals = {'(', ')', '{', '}', ';', '"', '%', ','}
-
-    ignore = ' \t'
-
-    # RegEx for tokens
-    PLUS = r'\+'
-    MINUS = r'-'
-    TIMES = r'\*'
-    DIVIDE = r'/'
-    EQ = r'=='
-    ASSIGN = r'='
-    AND = r'&&'
-    OR = r'\|\|'
-    NE = r'!='
-    NOT = r'!'
-    LT = r'<'
-    GT = r'>'
-    LE = r'<='
-    GE = r'>='
-    PR = r'printf'
-    INT = r'int'
-    AMPERSAND = r'&'
-    SC = r'scanf'
-
-    @_(r'\d+')
-    def NUMBER(self, t):
-        t.value = int(t.value)
-        return t
-
-    # Identifiers and keywords
-    ID = r'[a-zA-Z_][a-zA-Z0-9_]*'
-
-    @_(r'\"[\w\s\%,]*\"')
-    def CAD(self, t):
-        t.value = str(t.value)
-        return t
-
-class Node():
-    def ret():
-        pass
-
-class IntNode(Node):
-    def __init__(self, NUM):
-        self.v1 = NUM
-
-    def ret(self):
-        return self.v1
-
-class SumNode(Node):
-    def __init__(self, s1, s2)
-        self.v1 = s1
-        self.v2 = s2
-
-    def ret(self):
-        return self.v1 + self.v2
-
-class SubNode(Node):
-    def __init__(self, s1, s2):
-        self.v1 = s1
-        self.v2 = s2
-
-    def write(self):
-        return self.v1 - self.v2
-
-class ProdNode(Node):
-    def __init__(self, s1, s2):
-        self.v1 = s1
-        self.v2 = s2
-
-    def ret(self):
-        return self.v1 * self.v2
-
-class DivNode(Node):
-    def __init__(self, s1, s2):
-        self.v1 = s1
-        self.v2 = s2
-
-    def ret(self):
-        return self.v1 / self.v2
-
-class UnaryNode(Node):
-    def __init__(self, s):
-        self.v = s
-
-    def ret(self):
-        return -self.v
-
-class AndNode(Node):
-    def __init__(self, s1, s2):
-        self.v1 = s1
-        self.v2 = s2
-
-    def ret(self):
-        if self.s1 and self.s2:
-            return 1
-        else:
-            return 0
-
-class OrNode(Node):
-    def __init__(self, s1, s2):
-        self.v1 = s1
-        self.v2 = s2
-
-    def ret(self):
-        if self.v1 or self.v2:
-            return 1
-        else: 
-            return 0
-
-class NotNode(Node):
-    def __init__(self, s):
-        self.v = s
-
-    def ret(self):
-        return int(not self.s)
-
-class GrNode(Node):
-    def __init__(self, s1, s2):
-        self.v1 = s1
-        self.v2 = s2
-
-    def ret(self):
-        return int(self.v1 > self.v2)
-
-class LsNode(Node):
-    def __init__(self, s1, s2):
-        self.v1 = s1
-        self.v2 = s2
-
-    def ret(self):
-        return int(self.v1 < self.v2)
-
-class GrEqNode(Node):
-    def __init__(self, s1, s2):
-        self.v1 = s1
-        self.v2 = s2
-
-    def ret(self):
-        return int(self.v1 >= self.v2)
-
-class LsEqNode(Node):
-    def __init__(self, s1, s2):
-        self.v1 = s1
-        self.v2 = s2
-
-    def ret(set):
-        return int(self.v1 <= self.v2)
-
-class DistincNode(Node):
-    def __init__(self, s1, s2):
-        self.v1 = s1
-        self.v2 = s2
-
-    def ret(self):
-        return int(self.v1 != self.v2)
 
 class CalcParser(Parser):
     # Get the token list from the lexer
@@ -335,8 +170,7 @@ class CalcParser(Parser):
     @_('ID ASSIGN empty3 assign')
     def assign(self, p):
         if p.empty3:
-            Variables[p.ID] = p.assign
-            return Variables[p.ID]
+            return AssignNode(IdNode(p.ID), p.assign)
         else:
             print("Error.", p.ID, "not declared")
 
@@ -344,8 +178,7 @@ class CalcParser(Parser):
     def assign(self, p):
         if not p.empty4:
             if not p.empty1:
-                Pointer[p.ID0] = p.ID1
-                return Pointer[p.ID0]
+                return PointerNode(IdNode(p.ID), IdNode(p.ID))
             else:
                 print("error:", p.ID1, "not declared")
         else:
@@ -353,113 +186,104 @@ class CalcParser(Parser):
 
     @_('expr')
     def assign(self, p):
-        return p.expr
+        return p.expr.ret()
 
     @_('expr AND term')
     def expr(self, p):
-        if(p.expr and p.term):
-            return 1
-        else:
-            return 0
+        return AndNode(p.expr, p.term)
 
     @_('expr OR term')
     def expr(self, p):
-        if(p.expr or p.term):
-            return 1
-        else:
-            return 0
+        return OrNode(p.expr, p.term)
 
     @_('term')
     def expr(self, p):
-        return p.term
+        return p.term.ret()
 
     @_('term EQ logic')
     def term(self, p):
-        return int(p.term == p.logic)
+        return EqNode(p.term, p.logic)
 
     @_('logic')
     def term(self, p):
-        return p.logic
+        return p.logic.ret()
 
     @_('logic NE neqExpr')
     def logic(self, p):
-        return int(p.logic != p.neqExpr)
+        return DistincNode(p.logic, p.neqExpr)
 
     @_('neqExpr')
     def logic(self, p):
-        return p.neqExpr
+        return p.neqExpr.ret()
 
     @_('neqExpr LT operator')
     def neqExpr(self, p):
-        return int(p.neqExpr < p.operator)
+        return LsNode(p.neqExpr, p.operator)
 
     @_('neqExpr GT operator')
     def neqExpr(self, p):
-        return int(p.neqExpr > p.operator)
+        return GrNode(p.neqExpr, p.operator)
 
     @_('operator')
     def neqExpr(self, p):
-        return p.operator
+        return p.operator.ret()
 
     @_('operator LE operatorEQ')
     def operator(self, p):
-        return int(p.operator <= p.operatorEQ)
+        return LsEqNode(p.operator, p.operatorEQ)
 
     @_('operator GE operatorEQ')
     def operator(self, p):
-        return int(p.operator >= p.operatorEQ)
+        return GrEqNode(p.operator, p.operatorEQ)
 
     @_('operatorEQ')
     def operator(self, p):
-        return p.operatorEQ
+        return p.operatorEQ.ret()
 
     @_('operatorEQ MINUS factor')
     def operatorEQ(self, p):
-        return p.operatorEQ - p.factor
+        return SubNode(p.operatorEQ, p.factor)
 
     @_('operatorEQ PLUS factor')
     def operatorEQ(self, p):
-        return p.operatorEQ + p.factor
+        return SumNode(p.operatorEQ, p.factor)
 
     @_('factor')
     def operatorEQ(self, p):
-        return p.factor
+        return p.factor.ret()
 
     @_('factor TIMES cipher')
     def factor(self, p):
-        return p.factor * p.cipher
+        return ProdNode(p.factor, p.cipher)
 
     @_('factor DIVIDE cipher')
     def factor(self, p):
-        return p.factor / p.cipher
+        return DivNode(p.factor, p.cipher)
 
     @_('cipher')
     def factor(self, p):
-        return p.cipher
+        return p.cipher.ret()
 
     @_('MINUS cipher')
     def cipher(self, p):
-        return - p.cipher
+        return UnaryNode(p.cipher)
 
     @_('NOT cipher')
     def cipher(self, p):
-        return int(not p.cipher)
+        return NotNode(p.cipher)
 
     @_('ID')
     def cipher(self, p):
-        if p.ID not in Variables:
-            Variables[p.ID] = 0
-
-        return Variables[p.ID]
+        return IdNode(p.ID)
 
     @_('NUMBER')
     def cipher(self, p):
-        n = IntNode(p.NUMBER)
-        return n
+        return IntNode(p.NUMBER)
+        
 
     @_('"(" assign ")"')
     def cipher(self, p):
-        return p.assign
+        return AssignNode(p.assign)
 
     # Controls wether or not variable is declared
     # previously to declaration
@@ -510,16 +334,3 @@ class CalcParser(Parser):
             return True
         else:
             return False
-
-if __name__ == "__main__":
-    lexer = CalcLexer()
-    parser = CalcParser()
-
-    while True:
-        try:
-            text = input('calc > ')
-            result = parser.parse(lexer.tokenize(text))
-            print(Variables)
-            print(Pointer)
-        except EOFError:
-            break
