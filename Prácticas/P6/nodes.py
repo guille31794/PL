@@ -7,19 +7,6 @@ class Node():
     def ret():
         pass
 
-class IdNode(Node):
-    def __init__(self, id):
-        if id not in Variables:
-            Variables[id] = IntNode()
-
-        self.id = id
-    
-    def ret(self):
-        return Variables[id]
-
-    def id(self):
-        return self.id
-
 class IntNode(Node):
     def __init__(self, val = 0):
         self.v = val
@@ -151,6 +138,19 @@ class AssignNode(Node):
     def ret(self):
         return Variables[self.assigned]
 
+class IdNode(Node):
+    def __init__(self, id):
+        if id not in Variables:
+            Variables[id] = IntNode()
+
+        self.id = id
+    
+    def ret(self):
+        return self.id
+
+    def id(self):
+        return Variables[self.id]
+
 class PointerNode(Node):
     def __init__(self, p0, p1):
         self.pointer = p0.id()
@@ -160,6 +160,15 @@ class PointerNode(Node):
         return Pointer[self.pointer]
 
 class PrintNode(Node):
-    def __init__(self, ):
+    def __init__(self, str, param):
 
     def ret(self):
+        print(self.str)
+
+class ParamNode(Node):
+    def __init__(self, id):
+        self.p = id.ret()
+        printf.append(Variables[id.ret()])
+
+    def ret(self):
+        return self.p

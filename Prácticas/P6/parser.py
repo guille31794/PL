@@ -89,6 +89,7 @@ class CalcParser(Parser):
         if not p.empty1:
             printf.append(hex(id(Variables[p.ID])))
         elif not p.empty4:
+            #return ParamNode()
             printf.append(hex(id(Pointer[p.ID])))
         else:
             print("error:", p.ID, "not declared")
@@ -96,8 +97,7 @@ class CalcParser(Parser):
     @_('"," TIMES ID empty6 param')
     def param(self, p):
         if p.empty6:
-            printf.append(Variables[Pointer[p.ID]])
-                
+            return ParamNode(PointerNode(p.ID)) 
 
     @_('")"')
     def param(self, p):
@@ -119,8 +119,7 @@ class CalcParser(Parser):
     def variable(self, p):
         if p.empty1:
             if p.empty4:
-                Variables[p.ID] = 0
-                return Variables[p.ID]
+                return IdNode(p.ID)
             else:
                 print("error: conflicting types for", p.ID)
         else:
@@ -130,8 +129,7 @@ class CalcParser(Parser):
     def variable(self, p):
         if p.empty2:
             if p.empty5:
-                Variables[p.ID] = p.cipher
-                return Variables[p.ID]
+                return AssignNode(IdNode(p.ID), p.cipher)
             else:
                 print("error: conflicting types for", p.ID)
         else:
@@ -141,8 +139,7 @@ class CalcParser(Parser):
     def pointer(self, p):
         if p.empty1:
             if p.empty4:
-                Pointer[p.ID] = 'NULL'
-                return Pointer[p.ID]
+                return PointerNode(IdNode(p.ID), 'NULL')
             else:
                 print("Error:", p.ID, "redeclared")
         else:
@@ -152,8 +149,7 @@ class CalcParser(Parser):
     def pointer(self, p):
         if p.empty2:
             if p.empty5:
-                Pointer[p.ID0] = p.ID1
-                return p.ID0
+                return PointerNode(IdNode(p.ID0), IdNode(p.ID1))
             else:
                 print("Error:", p.ID0, "redeclared")
         else:
@@ -178,7 +174,7 @@ class CalcParser(Parser):
     def assign(self, p):
         if not p.empty4:
             if not p.empty1:
-                return PointerNode(IdNode(p.ID), IdNode(p.ID))
+                return PointerNode(IdNode(p.ID0), IdNode(p.ID1))
             else:
                 print("error:", p.ID1, "not declared")
         else:
