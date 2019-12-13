@@ -1,3 +1,5 @@
+import sys
+
 Variables = {}
 Pointer = {}
 printf = []
@@ -15,7 +17,7 @@ class IntNode(Node):
         return self.v
 
 class SumNode(Node):
-    def __init__(self, s1, s2)
+    def __init__(self, s1, s2):
         self.v1 = s1
         self.v2 = s2
 
@@ -141,7 +143,7 @@ class AssignNode(Node):
 class IdNode(Node):
     def __init__(self, id):
         if id not in Variables:
-            Variables[id] = IntNode()
+            Variables[id] = IntNode().ret()
 
         self.id = id
     
@@ -160,15 +162,39 @@ class PointerNode(Node):
         return Pointer[self.pointer]
 
 class PrintNode(Node):
-    def __init__(self, str, param):
+    def __init__(self, string):
+        self.string = string[1:len(string-1)]
+        try:
+            if string.find("%d%") > -1:
+                self.string = string.replace("%d", str(printf.pop()), 1)
+                while self.string.find("%d") > -1:
+                    self.string = self.string.replace("%d", str(printf.pop()), 1)
+            elif string.find("%d ") > -1:
+                self.string = string.replace("%d", str(printf.pop()), 1)
+                while self.string.find("%d") > -1:
+                    self.string = self.string.replace("%d", str(printf.pop()), 1)
+            else: 
+                string.find("%d\"") > -1
+                self.string = string.replace("%d", str(printf.pop()), 1)
+                while self.string.find("%d") > -1:
+                    self.string = self.string.replace("%d", str(printf.pop()), 1)
+        except IndexError:
+            print("error: segmetation fault code 20502")
 
     def ret(self):
         print(self.str)
 
-class ParamNode(Node):
-    def __init__(self, id):
-        self.p = id.ret()
-        printf.append(Variables[id.ret()])
+class ScanfNode(Node):
+    def __init__(self, string):
+        leng = len(scanf)
+        while string.find("%d") > -1 and leng > 0:
+            Variables[scanf.pop()] = input()
+            string = string.replace("%d", "", 1)
+            leng -= 1
+                
+        if leng > 0 or string.find("%d") > -1:
+            print("error: incorrect syntax")
+            sys.exit()
 
     def ret(self):
-        return self.p
+        pass

@@ -1,7 +1,6 @@
 from lexer import * # Test without from.. *
 from nodes import *
 from sly import Parser
-import sys
 
 class CalcParser(Parser):
     # Get the token list from the lexer
@@ -18,31 +17,24 @@ class CalcParser(Parser):
     
     @_('printf')
     def whatever(self, p):
-        pass
+        return printf.ret()
 
     @_('scanf')
     def whatever(self, p):
-        pass
+        return scanf.ret()
 
     @_('declaration')
     def whatever(self, p):
         pass
+        #return declaration.ret()
 
     @_('assign')
     def whatever(self, p):
-        pass
+        return assign.ret()
 
     @_('SC "(" CAD store')
     def scanf(self, p):
-        leng = len(scanf)
-        while p.CAD.find("%d") > -1 and leng > 0:
-                Variables[scanf.pop()] = input()
-                p.CAD = p.CAD.replace("%d", "", 1)
-                leng -= 1
-                
-        if leng > 0 or p.CAD.find("%d") > -1:
-            print("error: incorrect syntax")
-            sys.exit()
+        return ScanfNode(CAD)
 
     @_('"," AMPERSAND ID store')
     def store(self, p):
@@ -54,26 +46,7 @@ class CalcParser(Parser):
 
     @_('PR "(" CAD param')
     def printf(self, p):
-        try:
-            if p.CAD.find("%d%") > -1:
-                cad = p.CAD.replace("%d", str(printf.pop()), 1)
-                while cad.find("%d") > -1:
-                    cad = cad.replace("%d", str(printf.pop()), 1)
-                print(cad[1:len(cad)-1])
-            elif p.CAD.find("%d ") > -1:
-                cad = p.CAD.replace("%d", str(printf.pop()), 1)
-                while cad.find("%d") > -1:
-                    cad = cad.replace("%d", str(printf.pop()), 1)
-                print(cad[1:len(cad)-1])
-            elif p.CAD.find("%d\"") > -1:
-                cad = p.CAD.replace("%d", str(printf.pop()), 1)
-                while cad.find("%d") > -1:
-                    cad = cad.replace("%d", str(printf.pop()), 1)
-                print(cad[1:len(cad)-1])
-            else:
-                print(p.CAD[1:len(p.CAD)-1])
-        except IndexError:
-            print("error: segmetation fault code 20502")
+        return PrintNode(CAD)
 
     @_('"," ID empty1 empty4 param')
     def param(self, p):
@@ -89,7 +62,6 @@ class CalcParser(Parser):
         if not p.empty1:
             printf.append(hex(id(Variables[p.ID])))
         elif not p.empty4:
-            #return ParamNode()
             printf.append(hex(id(Pointer[p.ID])))
         else:
             print("error:", p.ID, "not declared")
@@ -109,10 +81,12 @@ class CalcParser(Parser):
 
     @_('variable')
     def dectypes(self, p):
+        #return variable.ret()
         pass
 
     @_('pointer')
     def dectypes(self, p):
+        #return pointer.ret()
         pass
 
     @_('ID empty1 empty4 variableSeparator')
