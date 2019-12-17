@@ -2,7 +2,7 @@ import sys
 
 Variables = {}
 Pointer = {}
-printf = []
+Printf = []
 scanf = []
 
 class Node():
@@ -14,7 +14,7 @@ class IntNode(Node):
         self.v = val
 
     def ret(self):
-        return self.v
+        return int(self.v)
 
 class SumNode(Node):
     def __init__(self, s1, s2):
@@ -22,15 +22,15 @@ class SumNode(Node):
         self.v2 = s2
 
     def ret(self):
-        return self.v1 + self.v2
+        return self.v1.ret() + self.v2.ret()
 
 class SubNode(Node):
     def __init__(self, s1, s2):
         self.v1 = s1
         self.v2 = s2
 
-    def write(self):
-        return self.v1 - self.v2
+    def ret(self):
+        return self.v1.ret() - self.v2.ret()
 
 class ProdNode(Node):
     def __init__(self, s1, s2):
@@ -38,7 +38,7 @@ class ProdNode(Node):
         self.v2 = s2
 
     def ret(self):
-        return self.v1 * self.v2
+        return self.v1.ret() * self.v2.ret()
 
 class DivNode(Node):
     def __init__(self, s1, s2):
@@ -46,14 +46,17 @@ class DivNode(Node):
         self.v2 = s2
 
     def ret(self):
-        return self.v1 / self.v2
+        return int(self.v1.ret() / self.v2.ret())
 
 class UnaryNode(Node):
     def __init__(self, s):
-        self.v = s
+        self.v = s.ret()
 
     def ret(self):
-        return -self.v
+        if self.v in Variables:
+            return -Variables[self.v]
+        else:
+            return -self.v
 
 class AndNode(Node):
     def __init__(self, s1, s2):
@@ -82,7 +85,7 @@ class NotNode(Node):
         self.v = s
 
     def ret(self):
-        return int(not self.s)
+        return int(not self.s.ret())
 
 class GrNode(Node):
     def __init__(self, s1, s2):
@@ -90,7 +93,7 @@ class GrNode(Node):
         self.v2 = s2
 
     def ret(self):
-        return int(self.v1 > self.v2)
+        return int(self.v1.ret() > self.v2.ret())
 
 class LsNode(Node):
     def __init__(self, s1, s2):
@@ -98,7 +101,7 @@ class LsNode(Node):
         self.v2 = s2
 
     def ret(self):
-        return int(self.v1 < self.v2)
+        return int(self.v1.ret() < self.v2.ret())
 
 class GrEqNode(Node):
     def __init__(self, s1, s2):
@@ -106,36 +109,33 @@ class GrEqNode(Node):
         self.v2 = s2
 
     def ret(self):
-        return int(self.v1 >= self.v2)
+        return int(self.v1.ret() >= self.v2.ret())
 
 class LsEqNode(Node):
     def __init__(self, s1, s2):
         self.v1 = s1
         self.v2 = s2
 
-    def ret(set):
-        return int(self.v1 <= self.v2)
+    def ret(self):
+        return int(self.v1.ret() <= self.v2.ret())
 
 class DistincNode(Node):
     def __init__(self, s1, s2):
-        self.v1 = s1
-        self.v2 = s2
-
+        self.v = int(s1.ret() != s2.ret())
     def ret(self):
-        return int(self.v1 != self.v2)
+        return self.v
 
 class EqNode(Node):
     def __init__(self, s1, s2):
-        self.v1 = s1
-        self.v2 = s2
+        self.v = int(s1.ret() == s2.ret())
 
     def ret(self):
-        return int(self.v1 == self.v2)
+        return self.v
 
 class AssignNode(Node):
     def __init__(self, id, idval):
-        self.assigned = id.id()
-        Variables[id.id()] = idval
+        self.assigned = id.ret()
+        Variables[id.ret()] = idval
         
     def ret(self):
         return Variables[self.assigned]
@@ -163,26 +163,29 @@ class PointerNode(Node):
 
 class PrintNode(Node):
     def __init__(self, string):
-        self.string = string[1:len(string-1)]
+        self.string = string[1:len(string)-1]
         try:
-            if string.find("%d%") > -1:
-                self.string = string.replace("%d", str(printf.pop()), 1)
+            if self.string.find("%d") > -1:
+                self.string = self.string.replace("%d", str(Printf.pop()), 1)
                 while self.string.find("%d") > -1:
-                    self.string = self.string.replace("%d", str(printf.pop()), 1)
-            elif string.find("%d ") > -1:
-                self.string = string.replace("%d", str(printf.pop()), 1)
+                    self.string = self.string.replace("%d", str(Printf.pop()), 1)
+            elif self.string.find("%d%") > -1:
+                self.string = self.string.replace("%d", str(Printf.pop()), 1)
                 while self.string.find("%d") > -1:
-                    self.string = self.string.replace("%d", str(printf.pop()), 1)
-            else: 
-                string.find("%d\"") > -1
-                self.string = string.replace("%d", str(printf.pop()), 1)
+                    self.string = self.string.replace("%d", str(Printf.pop()), 1)
+            elif self.string.find("%d ") > -1:
+                self.string = self.string.replace("%d", str(Printf.pop()), 1)
                 while self.string.find("%d") > -1:
-                    self.string = self.string.replace("%d", str(printf.pop()), 1)
+                    self.string = self.string.replace("%d", str(Printf.pop()), 1)
+            elif self.string.find("%d\"") > -1: 
+                self.string = self.string.replace("%d", str(Printf.pop()), 1)
+                while self.string.find("%d") > -1:
+                    self.string = self.string.replace("%d", str(Printf.pop()), 1)
         except IndexError:
             print("error: segmetation fault code 20502")
 
     def ret(self):
-        print(self.str)
+        print(self.string)
 
 class ScanfNode(Node):
     def __init__(self, string):

@@ -17,7 +17,7 @@ class CalcParser(Parser):
     
     @_('printf')
     def whatever(self, p):
-        return printf.ret()
+        return p.printf.ret()
 
     @_('scanf')
     def whatever(self, p):
@@ -26,11 +26,10 @@ class CalcParser(Parser):
     @_('declaration')
     def whatever(self, p):
         pass
-        #return declaration.ret()
 
     @_('assign')
     def whatever(self, p):
-        return assign.ret()
+        return p.assign
 
     @_('SC "(" CAD store')
     def scanf(self, p):
@@ -46,30 +45,30 @@ class CalcParser(Parser):
 
     @_('PR "(" CAD param')
     def printf(self, p):
-        return PrintNode(CAD)
+        return PrintNode(p.CAD)
 
     @_('"," ID empty1 empty4 param')
     def param(self, p):
         if not p.empty1:
-            printf.append(Variables[p.ID])
+            Printf.append(Variables[p.ID])
         elif not p.empty4:
-            printf.append(hex(id(Variables[Pointer[p.ID]])))
+            Printf.append(hex(id(Variables[Pointer[p.ID]])))
         else:
             print("error:", p.ID, "not declared")
 
     @_('"," AMPERSAND ID empty1 empty4 param')
     def param(self, p):
         if not p.empty1:
-            printf.append(hex(id(Variables[p.ID])))
+            Printf.append(hex(id(Variables[p.ID])))
         elif not p.empty4:
-            printf.append(hex(id(Pointer[p.ID])))
+            Printf.append(hex(id(Pointer[p.ID])))
         else:
             print("error:", p.ID, "not declared")
 
     @_('"," TIMES ID empty6 param')
     def param(self, p):
         if p.empty6:
-            return ParamNode(PointerNode(p.ID)) 
+            Printf.append(Variables[Pointer[p.ID]]) 
 
     @_('")"')
     def param(self, p):
@@ -81,12 +80,10 @@ class CalcParser(Parser):
 
     @_('variable')
     def dectypes(self, p):
-        #return variable.ret()
         pass
 
     @_('pointer')
     def dectypes(self, p):
-        #return pointer.ret()
         pass
 
     @_('ID empty1 empty4 variableSeparator')
@@ -103,7 +100,7 @@ class CalcParser(Parser):
     def variable(self, p):
         if p.empty2:
             if p.empty5:
-                return AssignNode(IdNode(p.ID), p.cipher)
+                return AssignNode(IdNode(p.ID), p.cipher.ret())
             else:
                 print("error: conflicting types for", p.ID)
         else:
@@ -140,7 +137,7 @@ class CalcParser(Parser):
     @_('ID ASSIGN empty3 assign')
     def assign(self, p):
         if p.empty3:
-            return AssignNode(IdNode(p.ID), p.assign)
+            return AssignNode(IdNode(p.ID), p.assign.ret())
         else:
             print("Error.", p.ID, "not declared")
 
@@ -156,7 +153,7 @@ class CalcParser(Parser):
 
     @_('expr')
     def assign(self, p):
-        return p.expr.ret()
+        return p.expr
 
     @_('expr AND term')
     def expr(self, p):
@@ -168,7 +165,7 @@ class CalcParser(Parser):
 
     @_('term')
     def expr(self, p):
-        return p.term.ret()
+        return p.term
 
     @_('term EQ logic')
     def term(self, p):
@@ -176,7 +173,7 @@ class CalcParser(Parser):
 
     @_('logic')
     def term(self, p):
-        return p.logic.ret()
+        return p.logic
 
     @_('logic NE neqExpr')
     def logic(self, p):
@@ -184,7 +181,7 @@ class CalcParser(Parser):
 
     @_('neqExpr')
     def logic(self, p):
-        return p.neqExpr.ret()
+        return p.neqExpr
 
     @_('neqExpr LT operator')
     def neqExpr(self, p):
@@ -196,7 +193,7 @@ class CalcParser(Parser):
 
     @_('operator')
     def neqExpr(self, p):
-        return p.operator.ret()
+        return p.operator
 
     @_('operator LE operatorEQ')
     def operator(self, p):
@@ -208,7 +205,7 @@ class CalcParser(Parser):
 
     @_('operatorEQ')
     def operator(self, p):
-        return p.operatorEQ.ret()
+        return p.operatorEQ
 
     @_('operatorEQ MINUS factor')
     def operatorEQ(self, p):
@@ -220,7 +217,7 @@ class CalcParser(Parser):
 
     @_('factor')
     def operatorEQ(self, p):
-        return p.factor.ret()
+        return p.factor
 
     @_('factor TIMES cipher')
     def factor(self, p):
@@ -232,7 +229,7 @@ class CalcParser(Parser):
 
     @_('cipher')
     def factor(self, p):
-        return p.cipher.ret()
+        return p.cipher
 
     @_('MINUS cipher')
     def cipher(self, p):
