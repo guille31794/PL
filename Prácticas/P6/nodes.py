@@ -18,35 +18,31 @@ class IntNode(Node):
 
 class SumNode(Node):
     def __init__(self, s1, s2):
-        self.v1 = s1
-        self.v2 = s2
+        self.v = s1.ret() + s2.ret()
 
     def ret(self):
-        return self.v1.ret() + self.v2.ret()
+        return self.v
 
 class SubNode(Node):
     def __init__(self, s1, s2):
-        self.v1 = s1
-        self.v2 = s2
+        self.v = s1.ret() - s2.ret()
 
     def ret(self):
-        return self.v1.ret() - self.v2.ret()
+        return self.v
 
 class ProdNode(Node):
     def __init__(self, s1, s2):
-        self.v1 = s1
-        self.v2 = s2
+        self.v = s1.ret() * s2.ret()
 
     def ret(self):
-        return self.v1.ret() * self.v2.ret()
+        return 
 
 class DivNode(Node):
     def __init__(self, s1, s2):
-        self.v1 = s1
-        self.v2 = s2
+        self.v = int(s1.ret() / s2.ret())
 
     def ret(self):
-        return int(self.v1.ret() / self.v2.ret())
+        return self.v
 
 class UnaryNode(Node):
     def __init__(self, s):
@@ -64,7 +60,7 @@ class AndNode(Node):
         self.v2 = s2
 
     def ret(self):
-        if self.s1 and self.s2:
+        if self.v1.ret() and self.v2.ret():
             return 1
         else:
             return 0
@@ -75,7 +71,7 @@ class OrNode(Node):
         self.v2 = s2
 
     def ret(self):
-        if self.v1 or self.v2:
+        if self.v1.ret() or self.v2.ret():
             return 1
         else: 
             return 0
@@ -89,19 +85,17 @@ class NotNode(Node):
 
 class GrNode(Node):
     def __init__(self, s1, s2):
-        self.v1 = s1
-        self.v2 = s2
+        self.v = int(s1.ret() > s2.ret())
 
     def ret(self):
-        return int(self.v1.ret() > self.v2.ret())
+        return self.v
 
 class LsNode(Node):
     def __init__(self, s1, s2):
-        self.v1 = s1
-        self.v2 = s2
+        self.v = int(s1.ret() < s2.ret())
 
     def ret(self):
-        return int(self.v1.ret() < self.v2.ret())
+        return self.v
 
 class GrEqNode(Node):
     def __init__(self, s1, s2):
@@ -122,6 +116,7 @@ class LsEqNode(Node):
 class DistincNode(Node):
     def __init__(self, s1, s2):
         self.v = int(s1.ret() != s2.ret())
+
     def ret(self):
         return self.v
 
