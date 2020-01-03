@@ -96,11 +96,11 @@ class CalcParser(Parser):
         else:
             print("Error.", p.ID, "redeclared.")
     
-    @_('ID ASSIGN empty2 empty5 cipher variableSeparator')
+    @_('ID ASSIGN empty2 empty5 expr variableSeparator')
     def variable(self, p):
         if p.empty2:
             if p.empty5:
-                return AssignNode(IdNode(p.ID), p.cipher.ret())
+                return AssignNode(IdNode(p.ID), p.expr.ret())
             else:
                 print("error: conflicting types for", p.ID)
         else:
@@ -110,7 +110,7 @@ class CalcParser(Parser):
     def pointer(self, p):
         if p.empty1:
             if p.empty4:
-                return PointerNode(IdNode(p.ID), 'NULL')
+                return PointerNode(p.ID, 'NULL')
             else:
                 print("Error:", p.ID, "redeclared")
         else:
@@ -120,7 +120,7 @@ class CalcParser(Parser):
     def pointer(self, p):
         if p.empty2:
             if p.empty5:
-                return PointerNode(IdNode(p.ID0), IdNode(p.ID1))
+                return PointerNode(p.ID0, p.ID1)
             else:
                 print("Error:", p.ID0, "redeclared")
         else:

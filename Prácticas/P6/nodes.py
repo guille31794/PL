@@ -35,7 +35,7 @@ class ProdNode(Node):
         self.v = s1.ret() * s2.ret()
 
     def ret(self):
-        return 
+        return self.v
 
 class DivNode(Node):
     def __init__(self, s1, s2):
@@ -150,8 +150,8 @@ class IdNode(Node):
 
 class PointerNode(Node):
     def __init__(self, p0, p1):
-        self.pointer = p0.id()
-        Pointer[self.pointer] = p1.id()
+        self.pointer = p0
+        Pointer[self.pointer] = p1
         
     def ret(self):
         return Pointer[self.pointer]
