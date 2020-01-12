@@ -1,0 +1,88 @@
+#Ejercicio 1 
+
+.text
+.glob Desplazamiento
+.type @function
+
+# main
+
+#Prologo
+main:
+pushl %ebp
+movl %esp %ebp
+subl $12, %esp
+
+pushl $s0
+call printf
+addl $4, %esp
+
+pushl v0
+pushl e0
+pushl $s1
+call scanf
+addl $12, %esp
+
+pushl $s2
+call printf
+addl $4, %esp
+
+pushl -12(%ebp)
+pushl $s3
+call scanf
+addl $8, %esp
+
+pushl $s4
+call printf
+addl $4, %esp
+
+pushl -8(%ebp)
+pushl  $s5
+call scanf
+addl $8, %esp
+
+subl $16, %esp
+call Desplazamiento
+movl %eax, -4(%ebp)
+
+pushl -4(%ebp)
+pushl $s6
+call printf
+addl $8, %esp
+
+movl $0, %eax
+
+movl %ebp, %esp
+popl %ebp
+ret
+
+# Desplazamiento
+.text
+.globl Desplazamiento
+.type Desplazamiento @function
+Desplazamiento:
+
+pushl %ebp
+movl %esp, %ebp
+subl $4, %esp
+
+movl 16(%ebp), %eax
+imull 16(%ebp), %eax
+imull 20(%ebp), %eax
+imull 12(%ebp), %eax
+movl $2, %ebx
+cdq
+idivl %ebx
+pushl %eax
+
+movl 16(%ebp), %eax
+imull 12(%ebp), %eax
+
+popl %ebx
+addl %ebx, %eax
+addl 8(%ebp), eax
+
+movl %eax, -4(%ebp)
+
+movl %ebp, %esp
+popl %ebp
+ret

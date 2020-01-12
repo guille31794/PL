@@ -9,12 +9,18 @@ class Node():
     def ret():
         pass
 
+    def toAssembler():
+        pass
+
 class IntNode(Node):
     def __init__(self, val = 0):
         self.v = val
 
     def ret(self):
         return int(self.v)
+    
+    def toAssembler():
+        
 
 class SumNode(Node):
     def __init__(self, s1, s2):
