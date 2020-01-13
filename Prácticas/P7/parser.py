@@ -45,12 +45,15 @@ class CalcParser(Parser):
 
     @_('PR "(" CAD param')
     def printf(self, p):
+        global stringNumber
+        stringNumber = stringNumber + 1
         return PrintNode(p.CAD)
 
     @_('"," ID empty1 empty4 param')
     def param(self, p):
         if not p.empty1:
             Printf.append(Variables[p.ID])
+            print(type(p.ID))
         elif not p.empty4:
             Printf.append(hex(id(Variables[Pointer[p.ID]])))
         else:
