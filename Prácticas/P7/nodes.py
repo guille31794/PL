@@ -40,9 +40,9 @@ class SumNode(Node):
         else:
             self.s = "movl " + str(s1.ebp()) + "(%ebp), %eax\n"
         if isinstance(s2, IntNode):
-            self.s = self.s + "addl " + s2.write() + ", %eax"
+            self.s = self.s + "addl " + s2.write() + ", %eax\n"
         else:
-            self.s = self.s + "addl " + str(s2.ebp()) + "(%ebp), %eax"
+            self.s = self.s + "addl " + str(s2.ebp()) + "(%ebp), %eax\n"
 
     def ret(self):
         return self.v
@@ -58,9 +58,9 @@ class SubNode(Node):
         else:
             self.s = "movl " + str(s1.ebp()) + "(%ebp), %eax\n"
         if isinstance(s2, IntNode):
-            self.s = self.s + "subl " + s2.write() + ", %eax"
+            self.s = self.s + "subl " + s2.write() + ", %eax\n"
         else:
-            self.s = self.s + "subl " + str(s2.ebp()) + "(%ebp), %eax"
+            self.s = self.s + "subl " + str(s2.ebp()) + "(%ebp), %eax\n"
 
     def ret(self):
         return self.v
@@ -76,9 +76,9 @@ class ProdNode(Node):
         else:
             self.s = "movl " + str(s1.ebp()) + "(%ebp), %eax\n"
         if isinstance(s2, IntNode):
-            self.s = self.s + "imull " + s2.write() + ", %eax"
+            self.s = self.s + "imull " + s2.write() + ", %eax\n"
         else:
-            self.s = self.s + "imull " + str(s2.ebp()) + "(%ebp), %eax" 
+            self.s = self.s + "imull " + str(s2.ebp()) + "(%ebp), %eax\n" 
 
     def ret(self):
         return self.v
@@ -89,7 +89,16 @@ class ProdNode(Node):
 class DivNode(Node):
     def __init__(self, s1, s2):
         self.v = int(s1.ret() / s2.ret())
-        self.s = "movl " + str()
+        if isinstance(s1, IntNode):
+            self.s = "movl " + s1.write() + ", %eax\n"
+        else:
+            self.s = "movl " + str(s1.ebp()) + "(%ebp), %eax\n"
+        self.s = self.s + "cdq\nmovl " 
+        if isinstance(s2, IntNode):
+            self.s = self.s + s2.write() + ", %eax\n"
+        else:
+            self.s = self.s + str(s2.ebp()) + "(%ebp), %ebx\n"
+        self.s = self.s + "divl %ebx\n"
 
     def ret(self):
         return self.v
@@ -100,48 +109,86 @@ class DivNode(Node):
 class UnaryNode(Node):
     def __init__(self, s):
         self.v = s.ret()
+        self.s = ProdNode(s, IntNode(-1)).write()
 
     def ret(self):
         if self.v in Variables:
             return -Variables[self.v]
         else:
             return -self.v
+    
+    def write(self):
+        return self.s
 
 class AndNode(Node):
     def __init__(self, s1, s2):
         self.v1 = s1
         self.v2 = s2
+        if isinstance(s1, IntNode):
+            self.s = "movl " + s1.write() + ", %eax\n"
+        else:
+            self.s = "movl " + s1.ebp() + "(%ebp), %eax\n"
+        if isinstance(s2, IntNode):
+            self.s = self.s + "andl %eax, " + s2.write() + '\n' 
+        else:
+            self.s = self.s + "andl %eax, " + s2.ebp() + "(%ebp)\n"
 
     def ret(self):
         if self.v1.ret() and self.v2.ret():
             return 1
         else:
             return 0
+    
+    def write(self):
+        return self.s
 
 class OrNode(Node):
     def __init__(self, s1, s2):
         self.v1 = s1
         self.v2 = s2
+        if isinstance(s1, IntNode):
+            self.s = "movl " + s1.write() + ", %eax\n"
+        else:
+            self.s = "movl " + s1.ebp() + "(%ebp), %eax\n"
+        if isinstance(s2, IntNode):
+            self.s = self.s + "orl %eax, " + s2.write() + '\n' 
+        else:
+            self.s = self.s + "orl %eax, " + s2.ebp() + "(%ebp)\n"
 
     def ret(self):
         if self.v1.ret() or self.v2.ret():
             return 1
         else: 
             return 0
+        
+    def write(self):
+        return self.s
 
 class NotNode(Node):
     def __init__(self, s):
         self.v = s
+        if isinstance(s, IntNode):
+            self.s = "movl " + s.write() + ", %eax\n"
+        else:
+            self.s = "movl " + s.ebp() + "(%ebp), %eax\n"
+        self.s = self.s + "negl %eax\n"
 
     def ret(self):
-        return int(not self.s.ret())
+        return int(not self.v.ret())
+
+    def write(self):
+        return self.s
 
 class GrNode(Node):
     def __init__(self, s1, s2):
         self.v = int(s1.ret() > s2.ret())
+        self.s = 
 
     def ret(self):
         return self.v
+    
+    def write(self):
+        return self.s
 
 class LsNode(Node):
     def __init__(self, s1, s2):
