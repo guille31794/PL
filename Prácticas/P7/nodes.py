@@ -125,10 +125,12 @@ class AndNode(Node):
             self.s = "movl " + s1.write() + ", %eax\n"
         else:
             self.s = "movl " + s1.ebp() + "(%ebp), %eax\n"
+        self.s = self.s + "cmpl $0, %eax\nje false\n"
         if isinstance(s2, IntNode):
-            self.s = self.s + "andl %eax, " + s2.write() + '\n' 
+            self.s = "movl " + s2.write() + ", %eax\n"
         else:
-            self.s = self.s + "andl %eax, " + s2.ebp() + "(%ebp)\n"
+            self.s = "movl " + s2.ebp() + "(%ebp), %eax\n"
+        self.s = self.s + "cmpl $0, %eax\nje false\n"
 
     def ret(self):
         if self.v1.ret() and self.v2.ret():
@@ -147,10 +149,12 @@ class OrNode(Node):
             self.s = "movl " + s1.write() + ", %eax\n"
         else:
             self.s = "movl " + s1.ebp() + "(%ebp), %eax\n"
+        self.s = self.s + "cmpl $0, %eax\njne false\n"
         if isinstance(s2, IntNode):
-            self.s = self.s + "orl %eax, " + s2.write() + '\n' 
+            self.s = "movl " + s2.write() + ", %eax\n"
         else:
-            self.s = self.s + "orl %eax, " + s2.ebp() + "(%ebp)\n"
+            self.s = "movl " + s2.ebp() + "(%ebp), %eax\n"
+        self.s = self.s + "cmpl $0, %eax\njne false\n"
 
     def ret(self):
         if self.v1.ret() or self.v2.ret():
@@ -168,7 +172,7 @@ class NotNode(Node):
             self.s = "movl " + s.write() + ", %eax\n"
         else:
             self.s = "movl " + s.ebp() + "(%ebp), %eax\n"
-        self.s = self.s + "negl %eax\n"
+        self.s = self.s + "cmpl $0, %eax\nje false"
 
     def ret(self):
         return int(not self.v.ret())
@@ -342,38 +346,23 @@ class PointerNode(Node):
 class PrintNode(Node):
     def __init__(self, string):
         self.string = string[1:len(string)-1]
-        var_counter = 0
-        try:
-            if self.string.find("%d") > -1:
-                var_counter = var_counter + 1
-                self.string = self.string.replace("%d", str(Printf.pop()), 1)
-                while self.string.find("%d") > -1:
-                    var_counter = var_counter + 1
-                    self.string = self.string.replace("%d", str(Printf.pop()), 1)
-            elif self.string.find("%d%") > -1:
-                var_counter = var_counter + 1
-                self.string = self.string.replace("%d", str(Printf.pop()), 1)
-                while self.string.find("%d") > -1:
-                    var_counter = var_counter + 1
-                    self.string = self.string.replace("%d", str(Printf.pop()), 1)
-            elif self.string.find("%d ") > -1:
-                var_counter = var_counter + 1
-                self.string = self.string.replace("%d", str(Printf.pop()), 1)
-                while self.string.find("%d") > -1:
-                    var_counter = var_counter + 1
-                    self.string = self.string.replace("%d", str(Printf.pop()), 1)
-            elif self.string.find("%d\"") > -1:
-                var_counter = var_counter + 1
-                self.string = self.string.replace("%d", str(Printf.pop()), 1)
-                while self.string.find("%d") > -1:
-                    var_counter = var_counter + 1
-                    self.string = self.string.replace("%d", str(Printf.pop()), 1)
-        except IndexError:
-            print("error: segmetation fault code 20502")
+        var_counter = len(Printf)
+        Printf.reverse()
+        self.string = self.string % tuple(Printf)
+        self.s = ""
+        while var_counter > 1:
+            aux = Printf.pop()
+            print(Printf)
+            if aux in Variables:
+                variableList = list(Variables)
+                self.s = self.s + "pushl " + str((variableList.index(aux)+1)*(-4)) + "(%ebp)\n"
+            elif aux in Pointer:
+                pointerList = list(Pointer)
+                self.s = self.s + "pushl " + str((pointerList.index(aux)+len(Variables)+1)*(-4)) + "(%ebp)\n"
+            variableList = var_counter - 1
         global stringNumber
-        self.s = "pushl $" + str(stringNumber) + '\n'
-        self.s = self.s
-        
+        self.s = self.s + "pushl $s" + str(stringNumber) + '\n'
+        self.s = self.s + "call printf\n"
 
     def ret(self):
         print(self.string)
