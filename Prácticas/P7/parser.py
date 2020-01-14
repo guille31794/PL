@@ -17,6 +17,9 @@ class CalcParser(Parser):
     
     @_('printf')
     def whatever(self, p):
+        f = open("asembler.asm", "a")
+        f.write(p.printf.write())
+        f.close()
         return p.printf.ret()
 
     @_('scanf')
@@ -29,6 +32,9 @@ class CalcParser(Parser):
 
     @_('assign')
     def whatever(self, p):
+        f = open("asembler.asm", "a")
+        f.write(p.assign.write())
+        f.close()
         return p.assign
 
     @_('SC "(" CAD store')
@@ -52,7 +58,7 @@ class CalcParser(Parser):
     @_('"," ID empty1 empty4 param')
     def param(self, p):
         if not p.empty1:
-            Printf.append(Variables[p.ID])
+            Printf.append(p.ID)
         elif not p.empty4:
             Printf.append(hex(id(Variables[Pointer[p.ID]])))
         else:
@@ -92,7 +98,11 @@ class CalcParser(Parser):
     def variable(self, p):
         if p.empty1:
             if p.empty4:
-                return IdNode(p.ID)
+                obj = IdNode(p.ID)
+                f = open("asembler.asm", "a")
+                f.write(obj.write())
+                f.close()
+                return obj
             else:
                 print("error: conflicting types for", p.ID)
         else:
@@ -102,7 +112,11 @@ class CalcParser(Parser):
     def variable(self, p):
         if p.empty2:
             if p.empty5:
-                return AssignNode(IdNode(p.ID), p.expr.ret())
+                obj = AssignNode(IdNode(p.ID), p.expr.ret())
+                f = open("asembler.asm", "a")
+                f.write(obj.write())
+                f.close()
+                return obj
             else:
                 print("error: conflicting types for", p.ID)
         else:
@@ -155,6 +169,9 @@ class CalcParser(Parser):
 
     @_('expr')
     def assign(self, p):
+        f = open("asembler.asm", "a")
+        f.write(p.expr.write())
+        f.close()
         return p.expr
 
     @_('expr AND term')
@@ -195,6 +212,9 @@ class CalcParser(Parser):
 
     @_('operator')
     def neqExpr(self, p):
+        f = open("asembler.asm", "a")
+        f.write(p.operator.write())
+        f.close()
         return p.operator
 
     @_('operator LE operatorEQ')
@@ -207,6 +227,9 @@ class CalcParser(Parser):
 
     @_('operatorEQ')
     def operator(self, p):
+        f = open("asembler.asm", "a")
+        f.write(p.operatorEQ.write())
+        f.close()
         return p.operatorEQ
 
     @_('operatorEQ MINUS factor')
@@ -219,6 +242,9 @@ class CalcParser(Parser):
 
     @_('factor')
     def operatorEQ(self, p):
+        f = open("asembler.asm", "a")
+        f.write(p.factor.write())
+        f.close()
         return p.factor
 
     @_('factor TIMES cipher')
@@ -231,6 +257,9 @@ class CalcParser(Parser):
 
     @_('cipher')
     def factor(self, p):
+        f = open("asembler.asm", "a")
+        f.write(p.cipher.write())
+        f.close()
         return p.cipher
 
     @_('MINUS cipher')

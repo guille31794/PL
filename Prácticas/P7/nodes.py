@@ -172,7 +172,7 @@ class NotNode(Node):
             self.s = "movl " + s.write() + ", %eax\n"
         else:
             self.s = "movl " + s.ebp() + "(%ebp), %eax\n"
-        self.s = self.s + "cmpl $0, %eax\nje false"
+        self.s = self.s + "cmpl $0, %eax\nje false\n"
 
     def ret(self):
         return int(not self.v.ret())
@@ -323,7 +323,7 @@ class IdNode(Node):
         esp = esp - 4
         self.ebp_ = esp
         #self.s = "subl " + str(esp) + ", %esp\n"
-        self.s = "subl $4, %esp"
+        self.s = "subl $4, %esp\n"
         # It would be possible to write a local esp to count local
         # variables and join then in only one subl instruction?
     def ret(self):
@@ -346,20 +346,20 @@ class PointerNode(Node):
 class PrintNode(Node):
     def __init__(self, string):
         self.string = string[1:len(string)-1]
-        var_counter = len(Printf)
         Printf.reverse()
-        self.string = self.string % tuple(Printf)
+        valueList = []
+        for i in Printf:
+            valueList.append(Variables[i])  
+        self.string = self.string % tuple(valueList)
         self.s = ""
-        while var_counter > 1:
+        while len(Printf) > 0:
             aux = Printf.pop()
-            print(Printf)
             if aux in Variables:
                 variableList = list(Variables)
                 self.s = self.s + "pushl " + str((variableList.index(aux)+1)*(-4)) + "(%ebp)\n"
             elif aux in Pointer:
                 pointerList = list(Pointer)
                 self.s = self.s + "pushl " + str((pointerList.index(aux)+len(Variables)+1)*(-4)) + "(%ebp)\n"
-            variableList = var_counter - 1
         global stringNumber
         self.s = self.s + "pushl $s" + str(stringNumber) + '\n'
         self.s = self.s + "call printf\n"
