@@ -21,13 +21,14 @@ class Node():
 class IntNode(Node):
     def __init__(self, val = 0):
         self.v = val 
-        self.s = "$" + str(val)
+        #self.s = "$" + str(val)
 
     def ret(self):
         return int(self.v)
 
     def write(self):
-        return self.s
+        #return self.s
+        pass
 
 class SumNode(Node):
     def __init__(self, s1, s2):
@@ -299,12 +300,22 @@ class EqNode(Node):
 class AssignNode(Node):
     def __init__(self, id, idval):
         self.assigned = id.ret()
-        Variables[id.ret()] = idval
-        if isinstance(idval, IntNode):
-            self.s = "movl " + idval.write() + " ," + str(id.ebp()) + "(%ebp)\n"
+        if self.assigned in Variables:
+            if isinstance(idval, str):
+                Variables[self.assigned] = Variables[idval]
+                self.s = "movl %eax," + str(id.ebp()) + "(%ebp)\n"
+            else:
+                # Seriously doubting
+                Variables[self.assigned] = idval
+                self.s = "movl $" + str(idval) + " ," + str(id.ebp()) + "(%ebp)\n"
+                
         else:
-            # Seriously doubting
-            self.s = "movl %eax," + str(id.ebp()) + "(%ebp)\n"
+            Pointer[self.assigned] = idval.ret()
+            ebpPos = (len(Variables) + list(Pointer).index(self.assigned) + 1) * (-4)
+            variableList = list(Variables)
+            self.s = "leal " + str((variableList.index(idval.ret())+1)*(-4)) + "(%ebp), %eax\n"
+            self.s = self.s + "movl %eax, " + str(ebpPos) + "(%ebp)\n"
+        
 
     def ret(self):
         return Variables[self.assigned]
@@ -322,10 +333,8 @@ class IdNode(Node):
         global esp 
         esp = esp - 4
         self.ebp_ = esp
-        #self.s = "subl " + str(esp) + ", %esp\n"
         self.s = "subl $4, %esp\n"
-        # It would be possible to write a local esp to count local
-        # variables and join then in only one subl instruction?
+    
     def ret(self):
         return self.id_
 
@@ -339,9 +348,17 @@ class PointerNode(Node):
     def __init__(self, p0, p1):
         self.pointer = p0
         Pointer[self.pointer] = p1
+        self.id_ = id
+        global esp 
+        esp = esp - 4
+        self.ebp_ = esp
+        self.s = "subl $4, %esp\n"
         
     def ret(self):
         return Pointer[self.pointer]
+    
+    def write(self):
+        return self.s
 
 class PrintNode(Node):
     def __init__(self, string):
@@ -352,6 +369,7 @@ class PrintNode(Node):
             valueList.append(Variables[i])  
         self.string = self.string % tuple(valueList)
         self.s = ""
+        stackReverse = (len(Printf)+1)*4
         while len(Printf) > 0:
             aux = Printf.pop()
             if aux in Variables:
@@ -362,7 +380,7 @@ class PrintNode(Node):
                 self.s = self.s + "pushl " + str((pointerList.index(aux)+len(Variables)+1)*(-4)) + "(%ebp)\n"
         global stringNumber
         self.s = self.s + "pushl $s" + str(stringNumber) + '\n'
-        self.s = self.s + "call printf\n"
+        self.s = self.s + "call printf\naddl $" + str(stackReverse) + ", %esp\n"
 
     def ret(self):
         print(self.string)
@@ -373,14 +391,24 @@ class PrintNode(Node):
 class ScanfNode(Node):
     def __init__(self, string):
         leng = len(scanf)
-        while string.find("%d") > -1 and leng > 0:
-            Variables[scanf.pop()] = input()
+        variableList = list(Variables)
+        while string.find("%d") > -1 and len(scanf) > 0:
+            aux = scanf.pop()
+            Variables[aux] = input()
+            self.s = "leal " + str((variableList.index(aux)+1)*(-4)) + "(%ebp), %eax\n"
+            self.s = self.s + "pushl %eax\n" 
             string = string.replace("%d", "", 1)
-            leng -= 1
                 
-        if leng > 0 or string.find("%d") > -1:
+        if len(scanf) > 0 or string.find("%d") > -1:
             print("error: incorrect syntax")
             sys.exit()
+        
+        global stringNumber
+        self.s = self.s + "pushl $s" + str(stringNumber) + "\n"
+        self.s = self.s + "call scanf\naddl " + str(leng*(-4)) + ", %esp\n"
 
     def ret(self):
         pass
+
+    def write(self):
+        return self.s

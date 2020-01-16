@@ -24,7 +24,9 @@ class CalcParser(Parser):
 
     @_('scanf')
     def whatever(self, p):
-        return scanf.ret()
+        f = open("asembler.asm", "a")
+        f.write(p.scanf.write())
+        f.close()
 
     @_('declaration')
     def whatever(self, p):
@@ -39,7 +41,9 @@ class CalcParser(Parser):
 
     @_('SC "(" CAD store')
     def scanf(self, p):
-        return ScanfNode(CAD)
+        global stringNumber
+        stringNumber += 1
+        return ScanfNode(p.CAD)
 
     @_('"," AMPERSAND ID store')
     def store(self, p):
@@ -52,7 +56,7 @@ class CalcParser(Parser):
     @_('PR "(" CAD param')
     def printf(self, p):
         global stringNumber
-        stringNumber = stringNumber + 1
+        stringNumber += 1
         return PrintNode(p.CAD)
 
     @_('"," ID empty1 empty4 param')
@@ -98,7 +102,6 @@ class CalcParser(Parser):
     def variable(self, p):
         if p.empty1:
             if p.empty4:
-                obj = IdNode(p.ID)
                 f = open("asembler.asm", "a")
                 f.write(obj.write())
                 f.close()
@@ -112,6 +115,7 @@ class CalcParser(Parser):
     def variable(self, p):
         if p.empty2:
             if p.empty5:
+                print(type(p.expr))
                 obj = AssignNode(IdNode(p.ID), p.expr.ret())
                 f = open("asembler.asm", "a")
                 f.write(obj.write())
@@ -126,7 +130,11 @@ class CalcParser(Parser):
     def pointer(self, p):
         if p.empty1:
             if p.empty4:
-                return PointerNode(p.ID, 'NULL')
+                obj = PointerNode(p.ID, 'NULL')
+                f = open("asembler.asm", "a")
+                f.write(obj.write())
+                f.close()
+                return obj
             else:
                 print("Error:", p.ID, "redeclared")
         else:
@@ -166,6 +174,8 @@ class CalcParser(Parser):
                 print("error:", p.ID1, "not declared")
         else:
             print("error:", p.ID0, "not declared")
+
+    # It last assigns between pointers
 
     @_('expr')
     def assign(self, p):
@@ -212,9 +222,10 @@ class CalcParser(Parser):
 
     @_('operator')
     def neqExpr(self, p):
-        f = open("asembler.asm", "a")
-        f.write(p.operator.write())
-        f.close()
+        if not isinstance(p.operator, IntNode):
+            f = open("asembler.asm", "a")
+            f.write(p.operator.write())
+            f.close()
         return p.operator
 
     @_('operator LE operatorEQ')
@@ -227,9 +238,10 @@ class CalcParser(Parser):
 
     @_('operatorEQ')
     def operator(self, p):
-        f = open("asembler.asm", "a")
-        f.write(p.operatorEQ.write())
-        f.close()
+        if not isinstance(p.operatorEQ, IntNode):
+            f = open("asembler.asm", "a")
+            f.write(p.operatorEQ.write())
+            f.close()
         return p.operatorEQ
 
     @_('operatorEQ MINUS factor')
@@ -242,9 +254,10 @@ class CalcParser(Parser):
 
     @_('factor')
     def operatorEQ(self, p):
-        f = open("asembler.asm", "a")
-        f.write(p.factor.write())
-        f.close()
+        if not isinstance(p.factor, IntNode):
+            f = open("asembler.asm", "a")
+            f.write(p.factor.write())
+            f.close()
         return p.factor
 
     @_('factor TIMES cipher')
@@ -257,9 +270,10 @@ class CalcParser(Parser):
 
     @_('cipher')
     def factor(self, p):
-        f = open("asembler.asm", "a")
-        f.write(p.cipher.write())
-        f.close()
+        if not isinstance(p.cipher, IntNode):
+            f = open("asembler.asm", "a")
+            f.write(p.cipher.write())
+            f.close()
         return p.cipher
 
     @_('MINUS cipher')

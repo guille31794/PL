@@ -2,6 +2,6 @@
 
 int main(int argc, char const *argv[])
 {
-    int a=1, **p = &a;
-    printf("%d", *p);
+    int a=1, b=2;
+    printf("%d%d", a,b);
 }
