@@ -1,4 +1,4 @@
-from lexer import * # Test without from.. *
+from lexer import *
 from nodes import *
 from sly import Parser
 

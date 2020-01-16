@@ -15,19 +15,14 @@ class Node():
     def write(self):
         pass
 
-    def ebp(self):
-        pass
-
 class IntNode(Node):
     def __init__(self, val = 0):
         self.v = val 
-        #self.s = "$" + str(val)
 
     def ret(self):
         return int(self.v)
 
     def write(self):
-        #return self.s
         pass
 
 class SumNode(Node):
