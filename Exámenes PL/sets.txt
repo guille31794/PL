@@ -1,0 +1,23 @@
+First sets:
+	FIRST(hoja) = { ID, NUMBER, ( }
+	FIRST(operNOT) = { not, ID, NUMBER, ( }
+	FIRST(T) = { and, Epsilon }
+	FIRST(operAND) = { not, ID, NUMBER, ( }
+	FIRST(R) = { or, Epsilon }
+	FIRST(operOR) = { not, ID, NUMBER, ( }
+	FIRST(linea2) = { >, <, eq, Epsilon }
+	FIRST(linea) = { not, ID, NUMBER, ( }
+	FIST(expr) = { print, ID }
+	FIRST(entrada) = { print, ID, Epsilon }
+
+Follow sets:
+	FOLLOW(entrada) = { $ }
+	FOLLOW(expr) = { ; }
+	FOLLOW(linea) = { ; }
+	FOLLOW(linea2) = { ; }
+	FOLLOW(operOR) = FIRST(linea2) U FOLLOW(linea) = { >, <, eq, ; }
+	FOLLOW(R) = FOLLOW(operOR) = { >, <, eq, ; }
+	FOLLOW(operAND) = FIRST(R) U FOLLOW(operOR) = { >, <, eq, ;, or}
+	FOLLOW(T) = { >, <, eq, ;, or}
+	FOLLOW(operNOT) = FIRST(T) U FOLLOW(operAND) = { >, <, eq, ;, or, and}
+	FOLLOW(hoja) = FOLLOW(operNOT) = { >, <, eq, ;, or, and}

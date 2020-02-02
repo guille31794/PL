@@ -1,0 +1,23 @@
+entrada --> expr ; { evalua(expr.s) } entrada
+		--> Epsilon
+
+expr	--> PRINT linea { expr.s = nodoPrint(linea.s) }
+		--> ID ASSIGN linea { expr.s = nodoAsig(ID.lexval, linea.s) }
+
+linea	--> operOR > linea1 { linea.s = nodoCompara(>, operOR.s, linea1.s) }
+		--> operOR < linea1 { linea.s = nodoCompara(<, operOR.s, linea1.s) }
+		--> operOR EQ linea1 { linea.s = nodoCompara(==, operOR.s, linea1.s) }
+		--> operOR { linea.s = operOR.s }
+
+operOR	--> operOR1 or operAND { operOR.s = nodoOper(or, operOR1.s, operAND.s) }
+		--> operAND { operOR.s = operAND.s }
+
+operAND --> operAND1 and operNOT { operAND.s = nodoOper(and, operAND1.s, operNOT.s) }
+		--> operNOT { operAND.s = operNOT.s }
+
+operNOT --> not hoja { operNOT.s = nodoOper(!, hoja.s) }
+		--> hoja { operNOT.s = hoja.s }
+
+hoja	--> ID { hoja.s = nodoId(ID.lexval) }
+		--> NUMBER { hoja.s = nodoNum(NUMBER.lexval) }
+		--> ( linea ) { hoja.s = linea.s }
